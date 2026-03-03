@@ -161,7 +161,6 @@ with col_gemelo:
         st.plotly_chart(fig3d, use_container_width=True)
 
 with col_sankey:
-    # EL DIAGRAMA SANKEY SIGUE SIENDO VITAL PARA LA TRAZABILIDAD
     st.subheader("⛓️ Trazabilidad: Flujo de Muestras")
     if simular_alerta:
         fuentes, destinos, valores = [0, 1, 1, 2, 2], [1, 2, 4, 4, 3], [100, 20, 80, 20, 0]
@@ -169,10 +168,28 @@ with col_sankey:
         fuentes, destinos, valores = [0, 1, 2, 3], [1, 2, 3, 5], [100, 95, 90, 85]
         
     fig_sankey = go.Figure(data=[go.Sankey(
-        node = dict(pad=15, thickness=20, line=dict(color="black", width=0.5), label=["Recepción", "Extracción", "PCR", "Secuenciadores", "Emergencia (Neveras)", "IA Diagnóstico"], color=["blue", "blue", "blue", "red" if simular_alerta else "blue", "cyan", "green"]),
-        link = dict(source=fuentes, target=destinos, value=valores, color="rgba(100, 150, 250, 0.4)")
+        # MAGIA AQUÍ: Forzamos el color, tamaño y fuente de las letras del gráfico
+        textfont = dict(color="#ffffff", size=14, family="Arial"),
+        node = dict(
+            pad=20, 
+            thickness=20, 
+            line=dict(color="#1f2937", width=1), 
+            label=["Recepción", "Extracción", "PCR", "Secuenciadores", "Emergencia (Neveras)", "IA Diagnóstico"], 
+            # He oscurecido un poco los nodos para que el texto blanco contraste al máximo
+            color=["#2563eb", "#2563eb", "#2563eb", "#ef4444" if simular_alerta else "#2563eb", "#06b6d4", "#10b981"]
+        ),
+        link = dict(
+            source=fuentes, target=destinos, value=valores, 
+            color="rgba(59, 130, 246, 0.3)" # Transparencia sutil para que no tape el texto
+        )
     )])
-    fig_sankey.update_layout(height=400, margin=dict(l=0, r=0, b=0, t=0), paper_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
+    
+    fig_sankey.update_layout(
+        height=380, 
+        margin=dict(l=10, r=10, b=10, t=10), 
+        paper_bgcolor='rgba(0,0,0,0)', 
+        plot_bgcolor='rgba(0,0,0,0)'
+    )
     st.plotly_chart(fig_sankey, use_container_width=True)
 
 st.divider()
@@ -225,6 +242,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
