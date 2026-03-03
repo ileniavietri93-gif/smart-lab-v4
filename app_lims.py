@@ -65,7 +65,7 @@ k4.metric("🛡️ Integridad Red", "100%" if seguridad else "82%", delta="Encri
 col_gemelo, col_sankey = st.columns(2)
 
 with col_gemelo:
-    tab_2d, tab_3d = st.tabs(["🗺️ Plano Cenital (Cámara Térmica)", "🌋 Holograma 3D"])
+    tab_2d, tab_3d = st.tabs(["🗺️ Plano Cenital (Cámara Térmica)", "🌋 Gráfico 3D de Datos"])
     
     with tab_2d:
         st.caption("Monitorización térmica sobre plano técnico.")
@@ -81,11 +81,11 @@ with col_gemelo:
 
         fig_2d = go.Figure()
         
-        # El Heatmap difuminado
+        # AJUSTE 1: Bajamos la opacidad a 0.35 para que sea casi transparente
         fig_2d.add_trace(go.Heatmap(
             z=z_2d, 
             colorscale='Inferno' if simular_alerta else 'Viridis',
-            opacity=0.6, 
+            opacity=0.35, 
             zsmooth='best', 
             showscale=False
         ))
@@ -97,12 +97,12 @@ with col_gemelo:
             fig_2d.add_layout_image(dict(
                 source=imagen_fondo,
                 xref="x", yref="y", x=0, y=res, sizex=res, sizey=res,
-                sizing="stretch", opacity=0.4, layer="below"
+                sizing="stretch", opacity=0.8, layer="below"
             ))
         else:
             st.warning(f"⚠️ No se encuentra la imagen '{nombre_imagen}' en GitHub.")
         
-        # Ocultamos ejes
+        # Ocultamos ejes solo en el 2D para que parezca una pantalla limpia
         fig_2d.update_layout(
             xaxis=dict(visible=False), yaxis=dict(visible=False),
             margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)'
@@ -110,7 +110,7 @@ with col_gemelo:
         st.plotly_chart(fig_2d, use_container_width=True)
         
     with tab_3d:
-        st.caption("Gemelo Digital Holográfico (Rótalo con el ratón)")
+        st.caption("Vista de datos térmicos con ejes y cuadrícula de referencia.")
         x, y = np.linspace(-5, 5, 50), np.linspace(-5, 5, 50)
         xGrid, yGrid = np.meshgrid(y, x)
         z_3d = np.sin(xGrid) * 0.1 + np.cos(yGrid) * 0.1 + 21
@@ -119,17 +119,15 @@ with col_gemelo:
         fig3d = go.Figure(data=[go.Surface(
             z=z_3d, 
             colorscale='Inferno' if simular_alerta else 'Viridis', 
-            showscale=False,
-            # Líneas topográficas futuristas
-            contours = {"z": {"show": True, "start": 22, "end": 50, "size": 2, "color": "white"}}
+            showscale=False
         )])
         
-        # Ocultamos la "caja" matemática para que el gráfico parezca flotar
+        # AJUSTE 2: Restauramos los títulos de los ejes y la "caja" matemática 3D
         fig3d.update_layout(
             scene=dict(
-                xaxis=dict(visible=False), 
-                yaxis=dict(visible=False), 
-                zaxis=dict(visible=False), 
+                xaxis_title='Eje X (Metros)', 
+                yaxis_title='Eje Y (Metros)', 
+                zaxis_title='Temp °C',
                 camera=dict(eye=dict(x=1.3, y=1.3, z=0.8))
             ), 
             margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)'
@@ -201,6 +199,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
