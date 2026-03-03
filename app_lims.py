@@ -68,13 +68,12 @@ with col_gemelo:
     tab_2d, tab_3d = st.tabs(["🗺️ Plano Cenital (Cámara Térmica)", "🌋 Holograma 3D"])
     
     with tab_2d:
-        st.caption("Monitorización térmica difuminada sobre plano técnico.")
+        st.caption("Monitorización térmica sobre plano técnico.")
         
         # Generamos el Heatmap
         res = 60
         z_2d = np.random.uniform(20.5, 21.5, size=(res, res)) # Ruido de fondo suave
         if simular_alerta:
-            # Foco de calor en el lado derecho
             for i in range(res):
                 for j in range(res):
                     dist = np.sqrt((i-30)**2 + (j-45)**2)
@@ -82,7 +81,7 @@ with col_gemelo:
 
         fig_2d = go.Figure()
         
-        # EL SECRETO VISUAL: zsmooth='best' difumina los cuadros creando un efecto térmico real
+        # El Heatmap difuminado
         fig_2d.add_trace(go.Heatmap(
             z=z_2d, 
             colorscale='Inferno' if simular_alerta else 'Viridis',
@@ -91,9 +90,8 @@ with col_gemelo:
             showscale=False
         ))
         
-        # IMAGEN DE FONDO (Leída desde tu GitHub)
+        # IMAGEN DE FONDO
         nombre_imagen = "plano_isometrico.png" 
-        
         if os.path.exists(nombre_imagen):
             imagen_fondo = Image.open(nombre_imagen)
             fig_2d.add_layout_image(dict(
@@ -102,10 +100,9 @@ with col_gemelo:
                 sizing="stretch", opacity=0.4, layer="below"
             ))
         else:
-            st.warning(f"⚠️ El servidor en la nube no encuentra la imagen '{plano_isometrico.png}' en tu GitHub.")
-        ))
+            st.warning(f"⚠️ No se encuentra la imagen '{nombre_imagen}' en GitHub.")
         
-        # Ocultamos los ejes para que parezca una pantalla de radar
+        # Ocultamos ejes
         fig_2d.update_layout(
             xaxis=dict(visible=False), yaxis=dict(visible=False),
             margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)'
@@ -204,6 +201,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
