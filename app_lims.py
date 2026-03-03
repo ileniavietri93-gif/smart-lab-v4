@@ -12,10 +12,45 @@ st.set_page_config(page_title="Bio-Digital OS v5.0 (AI Powered)", layout="wide",
 # CSS: Textos legibles y contrastes
 st.markdown("""
     <style>
-    .stMetric { background-color: #111827; border: 1px solid #1f2937; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-    .stButton>button { border-radius: 5px; background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%); color: white !important; font-weight: bold; border: none; transition: all 0.3s ease; }
-    .stButton>button:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); border: none; }
-    .terminal-box { font-family: 'Courier New', monospace; background-color: #0d1117; padding: 15px; border-radius: 5px; border: 1px solid #30363d; color: #58a6ff; }
+    /* Fondo general y textos básicos */
+    .main { background-color: #0b0f19; color: #00ffcc; font-family: 'Courier New', Courier, monospace;}
+    h1, h2, h3 { color: #ffffff !important; font-family: 'Arial', sans-serif;}
+    
+    /* Diseño de las cajas de los KPIs */
+    .stMetric { 
+        background-color: #111827; 
+        border: 1px solid #1f2937; 
+        border-left: 4px solid #3b82f6; 
+        padding: 15px; 
+        border-radius: 5px; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
+    }
+    
+    /* MAGIA AQUÍ: Forzar los números grandes a BLANCO y con brillo */
+    div[data-testid="stMetricValue"] { 
+        color: #ffffff !important; 
+        text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.4);
+    }
+    
+    /* Forzar los títulos de arriba de los números a gris claro/blanco */
+    div[data-testid="stMetricLabel"] p { 
+        color: #e2e8f0 !important; 
+        font-size: 1.1em !important;
+    }
+
+    /* Estilo de los botones */
+    .stButton>button { 
+        border-radius: 5px; 
+        background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%); 
+        border: none; 
+        font-weight: bold; 
+        transition: all 0.3s ease; 
+        color: white !important;
+    }
+    .stButton>button:hover { 
+        transform: scale(1.05); 
+        box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); 
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -164,4 +199,5 @@ with col_term:
     elif roi: st.markdown("<div class='terminal-box'>[MÓDULO 4] Calculando TCO...<br>Ahorro energético: 14%<br>Eficiencia: +35%</div>", unsafe_allow_html=True)
     elif simular_alerta: st.error("🚨 [SYS_HALT] ERROR CRÍTICO.\nMotores de secuenciador sobrecalentados.\nDesviando muestras a criogenia.")
     else: st.markdown("<div class='terminal-box'>Sistema a la espera de comandos...<br>Monitorizando sensores IoT...</div>", unsafe_allow_html=True)
+
 
