@@ -139,7 +139,6 @@ with col_gemelo:
                     if dist < 15: z_2d[i,j] = 50 - dist*1.5
 
         fig_2d = go.Figure()
-        
         # Capa 1: EL HEATMAP CON TRANSPARENCIA (opacity=0.45)
         # Usamos zsmooth='best' para el difuminado técnico
         fig_2d.add_trace(go.Heatmap(
@@ -148,7 +147,9 @@ with col_gemelo:
             opacity=0.45, 
             zsmooth='best', 
             showscale=True,
-            colorbar=dict(title="°C", tickcolor="white", font=dict(color="white"))
+            # 🛠️ EL ARREGLO ESTÁ AQUÍ: Cambiamos 'font' por 'tickfont'
+            colorbar=dict(title="°C", tickcolor="white", tickfont=dict(color="white"))
+        ))
         ))
         
         # Capa 2: LA IMAGEN LOCAL plano_isometrico.png COMO FONDO (Si existe)
@@ -285,5 +286,6 @@ with col_output:
         terminal_txt += f"[{time.strftime('%H:%M:%S')}] ALL SYSTEMS NOMINAL..."
         
     st.code(terminal_txt, language="bash")
+
 
 
