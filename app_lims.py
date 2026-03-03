@@ -8,80 +8,67 @@ import os
 from PIL import Image
 
 # --- 1. CONFIGURACION Y ESTILOS ---
-st.set_page_config(page_title="Bio-Digital OS v5.0", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Bio-Digital OS v6.0", layout="wide", initial_sidebar_state="expanded")
 
-# Inyeccion de CSS para modo oscuro profesional
+# Inyeccion de CSS con forzado de colores
 st.markdown("""
     <style>
-    /* Fondo y texto base */
+    /* FORZAR FONDO OSCURO EN TODA LA APP */
+    .stApp {
+        background-color: #0b0f19;
+    }
     .main { 
         background-color: #0b0f19; 
         color: #e2e8f0; 
-        font-family: 'Courier New', Courier, monospace;
     }
 
-    /* Titulos principales - Blanco brillante */
-    h1, h2, h3, .stSubheader, [data-testid="stHeader"] { 
+    /* TITULOS: Blanco sobre fondo oscuro forzado */
+    h1, h2, h3, h4, .stSubheader, [data-testid="stHeader"], .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { 
         color: #ffffff !important; 
         font-family: 'Arial', sans-serif;
-        text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.3);
-        font-weight: 700 !important;
+        font-weight: 800 !important;
+        margin-bottom: 10px;
     }
 
-    /* Cajas de los KPIs */
+    /* SUBTITULOS O TITULOS SECUNDARIOS - Color Cyan para asegurar contraste */
+    .stMarkdown h3 {
+        color: #00ffcc !important;
+    }
+
+    /* CAJAS DE LOS KPIs */
     .stMetric { 
-        background-color: #111827; 
+        background-color: #111827 !important; 
         border: 1px solid #1f2937; 
         border-left: 4px solid #00ffcc; 
-        padding: 15px; 
-        border-radius: 5px; 
     }
     
-    /* Titulos de las cajas - Cyan neon */
+    /* Titulos internos de las cajas (Muestras, etc) */
     div[data-testid="stMetricLabel"] p { 
         color: #00ffcc !important; 
-        font-size: 1.1em !important; 
-        font-weight: 800 !important; 
-        text-transform: uppercase;
-        letter-spacing: 1px;
+        font-weight: bold !important;
     }
     
-    /* Numeros de las cajas - Blanco nuclear */
+    /* Numeros grandes */
     div[data-testid="stMetricValue"] { 
         color: #ffffff !important; 
-        text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5); 
     }
 
-    /* Textos secundarios y labels */
-    .stCaption, label, .stMarkdown p {
-        color: #cbd5e1 !important; 
-        font-size: 1.05em !important;
-    }
-
-    /* Alertas */
-    div[data-testid="stAlert"] { 
-        background-color: #111827 !important; 
-        border: 1px solid #3b82f6 !important; 
-    }
-    div[data-testid="stAlert"] * { 
-        color: #ffffff !important; 
-    }
-
-    /* Botones */
-    .stButton>button { 
-        border-radius: 5px; 
-        background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%); 
-        color: white !important;
-        font-weight: bold;
-        border: none;
+    /* TABLAS Y PESTAÑAS */
+    .stTabs [data-baseweb="tab-list"] { background-color: #0b0f19; }
+    .stTabs [data-baseweb="tab"] { color: #ffffff !important; font-weight: bold; }
+    
+    /* AJUSTE PARA EL HEADER DE STREAMLIT */
+    header[data-testid="stHeader"] {
+        background-color: rgba(11, 15, 25, 0.8);
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- HEADER ---
-c1, c2, c3 = st.columns([3, 1, 1])
-with c1:
-    st.markdown("<h1>🧬 BIO-DIGITAL OS <span style='color:#3b82f6; font-size:0.5em;'>v5.0 3D TWIN</span></h1>", unsafe_allow_html=True)
+# Usamos un contenedor con fondo específico para el titulo
+st.markdown("<div style='background-color:#111827; padding:20px; border-radius:10px; border:1px solid #1f2937;'>"
+            "<h1 style='margin:0; color:white;'>🧬 BIO-DIGITAL OS <span style='color:#3b82f6; font-size:0.5em;'>v6.0 PRO</span></h1>"
+            "</div>", unsafe_allow_html=True)
 
 st.divider()
 
@@ -104,12 +91,12 @@ k3.metric("🌡️ TEMP. GENERAL", "48.5°C" if simular_alerta else "21.5°C", d
 k4.metric("🛡️ RED IOT", "100%" if seguridad else "82%", delta="Encriptado" if seguridad else "Riesgo Medio")
 
 # --- GEMELO DIGITAL Y TRAZABILIDAD ---
-st.markdown("### 🌐 Gemelo Digital y Trazabilidad de Planta")
-col_gemelo, col_sankey = st.columns(2)
+c_left, c_right = st.columns(2)
 
-with col_gemelo:
-    tab_2d, tab_3d = st.tabs(["🗺️ Plano Cenital", "🌋 Grafico 3D de Datos"])
-    with tab_2d:
+with c_left:
+    st.markdown("### 🌐 Gemelo Digital")
+    tab1, tab2 = st.tabs(["🗺️ Plano Cenital", "🌋 Gráfico 3D"])
+    with tab1:
         res = 60
         z_2d = np.random.uniform(20.5, 21.5, size=(res, res))
         if simular_alerta:
@@ -117,86 +104,63 @@ with col_gemelo:
                 for j in range(res):
                     dist = np.sqrt((i-30)**2 + (j-45)**2)
                     if dist < 20: z_2d[i,j] = 50 - dist*1.5
-        fig_2d = go.Figure()
-        fig_2d.add_trace(go.Heatmap(z=z_2d, colorscale='Inferno' if simular_alerta else 'Viridis', opacity=0.35, zsmooth='best', showscale=False))
-        nombre_imagen = "plano_isometrico.png"
-        if os.path.exists(nombre_imagen):
-            imagen_fondo = Image.open(nombre_imagen)
-            fig_2d.add_layout_image(dict(source=imagen_fondo, xref="x", yref="y", x=0, y=res, sizex=res, sizey=res, sizing="stretch", opacity=0.8, layer="below"))
-        fig_2d.update_layout(xaxis=dict(visible=False), yaxis=dict(visible=False), margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)')
-        st.plotly_chart(fig_2d, use_container_width=True)
-    with tab_3d:
+        fig2 = go.Figure(data=go.Heatmap(z=z_2d, colorscale='Inferno' if simular_alerta else 'Viridis', opacity=0.4, zsmooth='best', showscale=False))
+        nombre_img = "plano_isometrico.png"
+        if os.path.exists(nombre_img):
+            img = Image.open(nombre_img)
+            fig2.add_layout_image(dict(source=img, xref="x", yref="y", x=0, y=res, sizex=res, sizey=res, sizing="stretch", opacity=0.7, layer="below"))
+        fig2.update_layout(xaxis=dict(visible=False), yaxis=dict(visible=False), margin=dict(l=0, r=0, b=0, t=0), height=350, paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig2, use_container_width=True)
+    with tab2:
         x, y = np.linspace(-5, 5, 50), np.linspace(-5, 5, 50)
-        xGrid, yGrid = np.meshgrid(y, x)
-        z_3d = np.sin(xGrid) * 0.1 + np.cos(yGrid) * 0.1 + 21
-        if simular_alerta: z_3d = z_3d + 30 * np.exp(-(xGrid**2 + yGrid**2) / 2)
-        fig3d = go.Figure(data=[go.Surface(z=z_3d, colorscale='Inferno' if simular_alerta else 'Viridis', showscale=False)])
-        fig3d.update_layout(scene=dict(xaxis_title='X', yaxis_title='Y', zaxis_title='Temp C', xaxis=dict(color="white"), yaxis=dict(color="white"), zaxis=dict(color="white")), margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)')
-        st.plotly_chart(fig3d, use_container_width=True)
+        xG, yG = np.meshgrid(y, x)
+        z_3 = np.sin(xG) * 0.1 + np.cos(yG) * 0.1 + 21
+        if simular_alerta: z_3 += 30 * np.exp(-(xG**2 + yG**2) / 2)
+        fig3 = go.Figure(data=[go.Surface(z=z_3, colorscale='Inferno' if simular_alerta else 'Viridis')])
+        fig3.update_layout(scene=dict(xaxis=dict(color="white"), yaxis=dict(color="white"), zaxis=dict(color="white")), margin=dict(l=0, r=0, b=0, t=0), height=350, paper_bgcolor='rgba(0,0,0,0)')
+        st.plotly_chart(fig3, use_container_width=True)
 
-with col_sankey:
+with c_right:
+    st.markdown("### ⛓️ Trazabilidad")
     fuentes, destinos, valores = ([0, 1, 1, 2, 2], [1, 2, 4, 4, 3], [100, 20, 80, 20, 0]) if simular_alerta else ([0, 1, 2, 3], [1, 2, 3, 5], [100, 95, 90, 85])
-    fig_sankey = go.Figure(data=[go.Sankey(
-        textfont = dict(color="#ffffff", size=14),
-        node = dict(pad=20, thickness=20, label=["Recepcion", "Extraccion", "PCR", "Secuenciadores", "Emergencia", "IA Diagnostico"], color=["#2563eb", "#2563eb", "#2563eb", "#ef4444" if simular_alerta else "#2563eb", "#06b6d4", "#10b981"]),
-        link = dict(source=fuentes, target=destinos, value=valores, color="rgba(59, 130, 246, 0.3)")
+    fig_s = go.Figure(data=[go.Sankey(
+        textfont = dict(color="white", size=12),
+        node = dict(pad=15, thickness=20, label=["Recepción", "Extracción", "PCR", "Secuenciadores", "Emergencia", "IA"], color="blue"),
+        link = dict(source=fuentes, target=destinos, value=valores, color="rgba(59, 130, 246, 0.4)")
     )])
-    fig_sankey.update_layout(height=420, margin=dict(l=10, r=10, b=10, t=10), paper_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
-    st.plotly_chart(fig_sankey, use_container_width=True)
+    fig_s.update_layout(height=400, margin=dict(l=10, r=10, b=10, t=10), paper_bgcolor='rgba(0,0,0,0)')
+    st.plotly_chart(fig_s, use_container_width=True)
 
 st.divider()
 
-# --- CONEXION CLOUD Y TELEMETRIA ---
-st.markdown("### ☁️ Cloud LIMS: Base de Datos Hospitalaria")
-col_db1, col_db2 = st.columns([2, 1])
+# --- BASE DE DATOS ---
+st.markdown("### ☁️ Cloud LIMS")
+c_db1, c_db2 = st.columns([2, 1])
 
-with col_db1:
-    if st.button("🔄 Sincronizar Servidor Cloud"):
-        with st.spinner('Estableciendo conexion segura...'):
-            time.sleep(1.2)
-            try:
-                # URL de tu base de datos Google Sheets
-                url_base_datos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTyoeJ1BQqhKmS8Zkjl2J72JJ0KB4zshN8nZtu30466po-nTs7171MuiRbuzLancCS-wt1r58hVE6vj/pub?gid=1441872631&single=true&output=csv"
-                df_nube = pd.read_csv(url_base_datos)
-                st.success(f"CONEXION OK: {len(df_nube)} registros sincronizados.")
-                st.dataframe(df_nube, use_container_width=True, hide_index=True)
-                
-                with col_db2:
-                    st.write("#### ANALISIS DE ESTABILIDAD")
-                    t_data = np.linspace(0, 10, 20)
-                    temp_base = 21.5 + np.random.normal(0, 0.2, 20)
-                    if simular_alerta: temp_base[15:] += 15
-                    fig_tel = go.Figure()
-                    fig_tel.add_trace(go.Scatter(x=t_data, y=temp_base, mode='lines+markers', line=dict(color='#00ffcc', width=3)))
-                    fig_tel.add_hrect(y0=20, y1=23, fillcolor="green", opacity=0.1, line_width=0)
-                    fig_tel.update_layout(height=280, margin=dict(t=10, b=10, l=10, r=10), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"), xaxis=dict(color="white"), yaxis=dict(color="white"))
-                    st.plotly_chart(fig_tel, use_container_width=True)
-            except Exception as e:
-                st.error(f"Error de enlace: {e}")
+with c_db1:
+    if st.button("🔄 Sincronizar Base de Datos"):
+        try:
+            url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTyoeJ1BQqhKmS8Zkjl2J72JJ0KB4zshN8nZtu30466po-nTs7171MuiRbuzLancCS-wt1r58hVE6vj/pub?gid=1441872631&single=true&output=csv"
+            df = pd.read_csv(url)
+            st.success("Sincronización Exitosa")
+            st.dataframe(df, use_container_width=True)
+            with c_db2:
+                st.markdown("#### Estabilidad Térmica")
+                fig_t = px.line(y=np.random.normal(21, 0.5, 20), title="Sensor Local")
+                fig_t.update_layout(height=250, paper_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
+                st.plotly_chart(fig_t, use_container_width=True)
+        except:
+            st.error("Error de conexión")
 
-# --- SECCION FINAL ---
+# --- FINAL ---
 st.divider()
-col_chat, col_output = st.columns([1, 1])
-
-with col_chat:
-    st.markdown("### 💬 Asistente IA")
-    if "mensajes" not in st.session_state: st.session_state.mensajes = [{"role": "assistant", "content": "Bienvenido al núcleo de IA del Bio-Digital LIMS."}]
-    for msg in st.session_state.mensajes[-2:]:
-        with st.chat_message(msg["role"]): st.markdown(msg["content"])
-    if prompt := st.chat_input("Consulta protocolos..."):
-        st.session_state.mensajes.append({"role": "user", "content": prompt})
-        res = "ALERTA: Acceso restringido por fallo critico." if simular_alerta else f"Analisis finalizado: {prompt}. Estado: Sistemas Optimos."
-        st.session_state.mensajes.append({"role": "assistant", "content": res})
-        st.rerun()
-
-with col_output:
-    st.markdown("### 🖥️ Terminal de Subsistemas")
-    with st.container(height=230, border=True):
-        if genetica: st.success(">>> [MODULO 1] Analisis genico BRCA1 completo.")
-        elif vision: st.warning(">>> [MODULO 2] Segmentacion celular irregular.")
-        elif roi: st.info(">>> [MODULO 4] ROI proyectado: 145.2% anual.")
-        elif simular_alerta: st.error(">>> [HALT] SOBRECALENTAMIENTO EN RACK 4.")
-        else: st.write(">>> Monitorizando sensores de planta...")
+c_bot, c_term = st.columns(2)
+with c_bot:
+    st.markdown("### 💬 IA Assistant")
+    st.chat_input("Consulta...")
+with c_term:
+    st.markdown("### 🖥️ Terminal LIMS")
+    st.code(">>> Monitorizando sensores...\n>>> Estado: Sistemas OK" if not simular_alerta else ">>> ALERTA: SOBRECALENTAMIENTO", language="bash")
 
 
 
