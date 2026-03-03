@@ -23,7 +23,7 @@ st.markdown("""
     div[data-testid="stMetricValue"] { color: #ffffff !important; text-shadow: 0px 0px 8px rgba(255, 255, 255, 0.4); }
     
     /* Forzar los títulos de arriba de los números a gris claro/blanco */
-    div[data-testid="stMetricLabel"] p { color: #e2e8f0 !important; font-size: 1.1em !important; }
+    div[data-testid="stMetricLabel"] p { color: #FFFFFF !important; font-size: 1.1em !important; }
 
     /* Estilo de los botones */
     .stButton>button { border-radius: 5px; background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%); border: none; font-weight: bold; transition: all 0.3s ease; color: white !important;}
@@ -199,6 +199,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
