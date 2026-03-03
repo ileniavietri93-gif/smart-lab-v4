@@ -10,18 +10,68 @@ from PIL import Image
 # --- 1. CONFIGURACIÓN EXTREMA Y ESTILOS (DASHBOARD DARK MODE) ---
 st.set_page_config(page_title="Bio-Digital OS v5.0", layout="wide", initial_sidebar_state="expanded")
 
-st.markdown("""
-    <style>
-    .main { background-color: #0b0f19; color: #00ffcc; font-family: 'Courier New', Courier, monospace;}
-    h1, h2, h3 { color: #ffffff !important; font-family: 'Arial', sans-serif;}
-    .stMetric { background-color: #111827; border: 1px solid #1f2937; border-left: 4px solid #00ffcc; padding: 15px; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-    div[data-testid="stMetricLabel"] p { color: #00ffcc !important; font-size: 1.15em !important; font-weight: 800 !important; }
-    div[data-testid="stMetricValue"] { color: #ffffff !important; text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8); }
-    div[data-testid="stAlert"] { background-color: #111827 !important; border: 1px solid #3b82f6 !important; border-radius: 8px !important; }
-    div[data-testid="stAlert"] * { color: #ffffff !important; }
-    .stButton>button { border-radius: 5px; background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%); border: none; font-weight: bold; color: white !important;}
+<style>
+    /* 1. FONDO Y TEXTO BASE */
+    .main { 
+        background-color: #0b0f19; 
+        color: #e2e8f0; 
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    /* 2. TÍTULOS PRINCIPALES (H1, H2, H3) - ¡Ahora en blanco brillante! */
+    h1, h2, h3, .stSubheader { 
+        color: #ffffff !important; 
+        font-family: 'Arial', sans-serif;
+        text-shadow: 0px 0px 5px rgba(255, 255, 255, 0.2);
+        font-weight: 700 !important;
+    }
+
+    /* 3. CAJAS DE LOS KPIs (Métricas) */
+    .stMetric { 
+        background-color: #111827; 
+        border: 1px solid #1f2937; 
+        border-left: 4px solid #00ffcc; 
+        padding: 15px; 
+        border-radius: 5px; 
+    }
+    
+    /* Títulos de las cajas (Muestras, Carga CPU, etc.) - Cyan neón */
+    div[data-testid="stMetricLabel"] p { 
+        color: #00ffcc !important; 
+        font-size: 1.1em !important; 
+        font-weight: 800 !important; 
+        text-transform: uppercase;
+    }
+    
+    /* Números de las cajas - Blanco nuclear */
+    div[data-testid="stMetricValue"] { 
+        color: #ffffff !important; 
+        text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.5); 
+    }
+
+    /* 4. TEXTOS DE CAPTION Y LABELS (Los que se veían borrosos) */
+    .stCaption, .stMarkdown p, label {
+        color: #cbd5e1 !important; /* Gris claro muy legible */
+        font-size: 1.05em !important;
+    }
+
+    /* 5. ALERTAS Y NOTIFICACIONES */
+    div[data-testid="stAlert"] { 
+        background-color: #111827 !important; 
+        border: 1px solid #3b82f6 !important; 
+    }
+    div[data-testid="stAlert"] * { 
+        color: #ffffff !important; 
+    }
+
+    /* BOTONES */
+    .stButton>button { 
+        border-radius: 5px; 
+        background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%); 
+        color: white !important;
+        font-weight: bold;
+    }
     </style>
-    """, unsafe_allow_html=True)
 
 # --- HEADER ---
 c1, c2, c3 = st.columns([3, 1, 1])
@@ -141,6 +191,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] ROI proyectado: 145%.")
         elif simular_alerta: st.error(">>> [HALT] SOBRECALENTAMIENTO.")
         else: st.write(">>> Monitorizando sensores IoT...")
+
 
 
 
