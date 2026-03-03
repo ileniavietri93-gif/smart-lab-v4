@@ -13,7 +13,7 @@ st.set_page_config(page_title="Bio-Digital OS v5.0", layout="wide", initial_side
 st.markdown("""
     <style>
     /* Fondo general y textos básicos */
-    .main { background-color: #0b0f19; color: #00ffcc; font-family: 'Courier New', Courier, monospace;}
+    .main { background-color: #0b0f19; color: #c7c8ca; font-family: 'Courier New', Courier, monospace;}
     h1, h2, h3 { color: #ffffff !important; font-family: 'Arial', sans-serif;}
     
     /* Diseño de las cajas de los KPIs */
@@ -199,6 +199,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
