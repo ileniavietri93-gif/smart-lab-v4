@@ -219,28 +219,40 @@ with col_db1:
                 st.success(f"✅ Conexión establecida. {len(df_nube)} muestras sincronizadas.")
                 st.dataframe(df_nube, use_container_width=True, hide_index=True)
                 
+                # --- FILA 3: CONEXIÓN A LA BASE DE DATOS EXTERNA (GOOGLE SHEETS) ---
+st.subheader("☁️ Cloud LIMS: Conexión a Base de Datos Externa")
+
+col_db1, col_db2 = st.columns([2, 1])
+
+with col_db1:
+    if st.button("🔄 Sincronizar con Servidor Hospitalario (Live)"):
+        with st.spinner('Conectando a la API en la nube...'):
+            time.sleep(1.5) 
+            try:
+                # !!! RECUERDA PONER TU ENLACE AQUÍ !!!
+                url_base_datos = "TU_ENLACE_CSV_AQUÍ" 
+                
+                df_nube = pd.read_csv(url_base_datos)
+                st.success("✅ Datos sincronizados con éxito desde la nube.")
+                st.dataframe(df_nube, use_container_width=True, hide_index=True)
+                
+                # --- GRÁFICA DE TELEMETRÍA AVANZADA ---
                 with col_db2:
                     st.write("#### 📊 Análisis de Estabilidad del Sistema")
-                    
-                    # Generamos datos de telemetría simulada
                     t_data = np.linspace(0, 10, 20)
                     temp_base = 21.5 + np.random.normal(0, 0.2, 20)
                     if simular_alerta:
-                        temp_base[15:] = temp_base[15:] + 15 # Salto térmico
+                        temp_base[15:] = temp_base[15:] + 15 
                     
                     fig_telemetria = go.Figure()
-                    
-                    # Línea de temperatura
                     fig_telemetria.add_trace(go.Scatter(
                         x=t_data, y=temp_base, mode='lines+markers',
                         name='Sensor B-12', line=dict(color='#00ffcc', width=3)
                     ))
                     
-                    # Bandas de seguridad (Efecto profesional)
-                    fig_telemetria.add_hrect(y0=20, y1=23, fillcolor="green", opacity=0.1, line_width=0, name="Rango Óptimo")
-                    if simular_alerta:
-                        fig_telemetria.add_annotation(x=t_data[15], y=temp_base[15], text="ANOMALÍA DETECTADA", showarrow=True, arrowhead=1, bgcolor="red")
-
+                    # Bandas de seguridad
+                    fig_telemetria.add_hrect(y0=20, y1=23, fillcolor="green", opacity=0.1, line_width=0)
+                    
                     fig_telemetria.update_layout(
                         height=280, margin=dict(t=10, b=10, l=10, r=10),
                         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
@@ -249,6 +261,9 @@ with col_db1:
                         yaxis=dict(gridcolor="#1f2937", title="°C")
                     )
                     st.plotly_chart(fig_telemetria, use_container_width=True)
+
+            except Exception as e:
+                st.error("⚠️ Error de conexión Cloud: Revisa el enlace CSV en el código.")
 
 # --- CHATBOT Y CONSOLA DE TERMINAL ---
 st.divider()
@@ -274,6 +289,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
