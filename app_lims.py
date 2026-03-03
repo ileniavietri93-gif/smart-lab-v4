@@ -14,7 +14,7 @@ st.markdown("""
     <style>
     /* Fondo general y textos básicos */
     .main { background-color: #0b0f19; color: #00ffcc; font-family: 'Courier New', Courier, monospace;}
-    h1, h2, h3 { color: #00ffcc !important; font-family: 'Arial', sans-serif;}
+    h1, h2, h3 { color: #5e5e5e !important; font-family: 'Arial', sans-serif;}
     
     /* 1. CAJAS DE LOS KPIs (Métricas) */
     .stMetric { 
@@ -252,6 +252,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
