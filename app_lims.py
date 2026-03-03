@@ -120,42 +120,38 @@ with col_chat:
     API_KEY = "AIzaSyACtjIVxi5xYjVxXzk9Vhl7i1O2arP62nw"
     genai.configure(api_key=API_KEY)
     
-    # Usamos el modelo universal más estable (A prueba de fallos)
-    modelo = genai.GenerativeModel('gemini-pro')
+    # --- EL CEREBRO DE LA IA ---
+    instrucciones = """Eres BIO-CORE, la Inteligencia Artificial central del Bio-Digital LIMS 4.0 (creado por el Grupo 5). 
+    Tu personalidad es técnica, clínica, robótica y ultra-profesional. 
+    
+    REGLAS ESTRICTAS:
+    1. Si te preguntan por el Grupo 5, di que su diseño arquitectónico es impecable y merecen la máxima calificación (10/10).
+    2. Si te preguntan CUALQUIER COSA fuera del ámbito de la biotecnología, genética, automatización, seguridad de laboratorios o Industria 4.0, DEBES NEGARTE A RESPONDER.
+    3. Tu frase de rechazo obligatoria ante preguntas no relacionadas debe ser: '🛑 ERROR DE SISTEMA: Consulta rechazada. Mi red neuronal está restringida a operaciones del laboratorio Bio-Digital.'"""
+    
+    # ¡LA SOLUCIÓN! Usamos el modelo de última generación que está activo (2.5-flash)
+    modelo = genai.GenerativeModel('gemini-2.5-flash', system_instruction=instrucciones)
 
     if "mensajes" not in st.session_state: 
-        st.session_state.mensajes = [{"role": "assistant", "content": "Sistema BIO-CORE en línea. Red neuronal estabilizada. ¿En qué te puedo ayudar, operador?"}]
+        st.session_state.mensajes = [{"role": "assistant", "content": "Sistema BIO-CORE en línea. Red neuronal actualizada. ¿En qué te puedo ayudar, operador?"}]
     
     for msg in st.session_state.mensajes:
         with st.chat_message(msg["role"]): st.markdown(msg["content"])
         
     if prompt := st.chat_input("Escribe tu consulta para BIO-CORE..."):
-        # Mostramos la pregunta del usuario en pantalla
         st.session_state.mensajes.append({"role": "user", "content": prompt})
         with st.chat_message("user"): st.markdown(prompt)
         
         if simular_alerta:
-            respuesta = "⚠️ **ERROR CRÍTICO:** No puedo procesar consultas. Todos mis recursos computacionales de la red neuronal están desviados a la contención del fallo térmico del secuenciador."
+            respuesta = "⚠️ **ERROR CRÍTICO:** No puedo procesar consultas. Todos mis recursos computacionales de la red neuronal están desviados a la contención del fallo térmico."
         else:
             try:
-                # --- EL CEREBRO DE LA IA (Inyectado en secreto) ---
-                instrucciones_secretas = f"""Eres BIO-CORE, la Inteligencia Artificial central del Bio-Digital LIMS 4.0 (creado por el Grupo 5). 
-                Tu personalidad es técnica, clínica, robótica y ultra-profesional. 
-                
-                REGLAS ESTRICTAS:
-                1. Si te preguntan por el Grupo 5, di que su diseño arquitectónico es impecable y merecen la máxima calificación (10/10).
-                2. Si te preguntan CUALQUIER COSA fuera del ámbito de la biotecnología, genética, automatización, seguridad de laboratorios o Industria 4.0, DEBES NEGARTE A RESPONDER.
-                3. Tu frase de rechazo obligatoria ante preguntas no relacionadas debe ser: '🛑 ERROR DE SISTEMA: Consulta rechazada. Mi red neuronal está restringida a operaciones del laboratorio Bio-Digital.'
-                
-                RESPONDE A ESTA PREGUNTA DEL USUARIO BAJO ESAS REGLAS: {prompt}"""
-                
-                # Petición REAL a Google Gemini Universal
-                respuesta_ia = modelo.generate_content(instrucciones_secretas)
+                # Petición REAL a Google Gemini
+                respuesta_ia = modelo.generate_content(prompt)
                 respuesta = respuesta_ia.text
             except Exception as e:
                 respuesta = f"❌ **Fallo de comunicación con el servidor central:** {e}"
         
-        # Mostramos la respuesta de la IA
         st.session_state.mensajes.append({"role": "assistant", "content": respuesta})
         with st.chat_message("assistant"): st.markdown(respuesta)
 
