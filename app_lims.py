@@ -229,16 +229,16 @@ with col_db1:
         with st.spinner('Conectando a la API en la nube...'):
             time.sleep(1.5) 
             try:
-                # !!! RECUERDA PONER TU ENLACE AQUÍ !!!
+                # RECUERDA PONER TU ENLACE AQUÍ
                 url_base_datos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTyoeJ1BQqhKmS8Zkjl2J72JJ0KB4zshN8nZtu30466po-nTs7171MuiRbuzLancCS-wt1r58hVE6vj/pub?gid=1441872631&single=true&output=csv" 
                 
                 df_nube = pd.read_csv(url_base_datos)
                 st.success("✅ Datos sincronizados con éxito desde la nube.")
                 st.dataframe(df_nube, use_container_width=True, hide_index=True)
                 
-                # --- GRÁFICA DE TELEMETRÍA AVANZADA ---
+                # LA GRÁFICA VA DENTRO DEL TRY PARA QUE SOLO SE VEA SI HAY DATOS
                 with col_db2:
-                    st.write("#### 📊 Análisis de Estabilidad del Sistema")
+                    st.write("#### 📊 Análisis de Estabilidad")
                     t_data = np.linspace(0, 10, 20)
                     temp_base = 21.5 + np.random.normal(0, 0.2, 20)
                     if simular_alerta:
@@ -250,20 +250,21 @@ with col_db1:
                         name='Sensor B-12', line=dict(color='#00ffcc', width=3)
                     ))
                     
-                    # Bandas de seguridad
+                    # Banda de seguridad verde
                     fig_telemetria.add_hrect(y0=20, y1=23, fillcolor="green", opacity=0.1, line_width=0)
                     
                     fig_telemetria.update_layout(
                         height=280, margin=dict(t=10, b=10, l=10, r=10),
                         paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
                         font=dict(color="white"),
-                        xaxis=dict(showgrid=False, title="Tiempo (min)"),
+                        xaxis=dict(showgrid=False, title="Minutos"),
                         yaxis=dict(gridcolor="#1f2937", title="°C")
                     )
                     st.plotly_chart(fig_telemetria, use_container_width=True)
 
             except Exception as e:
-                st.error("⚠️ Error de conexión Cloud: Revisa el enlace CSV en el código.")
+                # ESTA LÍNEA ES LA QUE CIERRA EL TRY Y EVITA EL ERROR
+                st.error(f"⚠️ Error de conexión Cloud: {e}")
 
 # --- CHATBOT Y CONSOLA DE TERMINAL ---
 st.divider()
@@ -289,6 +290,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
