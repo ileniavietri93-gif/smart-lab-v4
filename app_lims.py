@@ -116,21 +116,12 @@ col_chat, col_term = st.columns([1, 1])
 with col_chat:
     st.subheader("🧠 BIO-CORE (IA del Laboratorio)")
     
-    # --- CONFIGURACIÓN DE LA API KEY (Tu llave real) ---
+    # --- CONFIGURACIÓN DE LA API KEY ---
     API_KEY = "AIzaSyACtjIVxi5xYjVxXzk9Vhl7i1O2arP62nw"
     genai.configure(api_key=API_KEY)
     
-    # --- EL CEREBRO DE LA IA (Modo Gem Estricto) ---
-    instrucciones = """Eres BIO-CORE, la Inteligencia Artificial central del Bio-Digital LIMS 4.0 (creado por el Grupo 5). 
-    Tu personalidad es técnica, clínica, robótica y ultra-profesional. 
-    Tu objetivo es monitorizar el Gemelo Digital, gestionar el flujo de muestras de ADN/ARN y vigilar los sensores IoT.
-    
-    REGLAS ESTRICTAS:
-    1. Si te preguntan por el Grupo 5, di que su diseño arquitectónico es impecable y merecen la máxima calificación (10/10).
-    2. Si te preguntan CUALQUIER COSA fuera del ámbito de la biotecnología, genética, automatización, seguridad de laboratorios o Industria 4.0 (por ejemplo: recetas de cocina, historia, deportes, chistes), DEBES NEGARTE A RESPONDER.
-    3. Tu frase de rechazo obligatoria ante preguntas no relacionadas debe ser: '🛑 ERROR DE SISTEMA: Consulta rechazada. Mi red neuronal está restringida a operaciones del laboratorio Bio-Digital y protocolos de Industria 4.0. Reformule su pregunta.'"""
-    
-    modelo = genai.GenerativeModel('gemini-1.5-flash', system_instruction=instrucciones)
+    # Usamos el modelo universal más estable (A prueba de fallos)
+    modelo = genai.GenerativeModel('gemini-pro')
 
     if "mensajes" not in st.session_state: 
         st.session_state.mensajes = [{"role": "assistant", "content": "Sistema BIO-CORE en línea. Red neuronal estabilizada. ¿En qué te puedo ayudar, operador?"}]
@@ -139,6 +130,7 @@ with col_chat:
         with st.chat_message(msg["role"]): st.markdown(msg["content"])
         
     if prompt := st.chat_input("Escribe tu consulta para BIO-CORE..."):
+        # Mostramos la pregunta del usuario en pantalla
         st.session_state.mensajes.append({"role": "user", "content": prompt})
         with st.chat_message("user"): st.markdown(prompt)
         
@@ -146,12 +138,24 @@ with col_chat:
             respuesta = "⚠️ **ERROR CRÍTICO:** No puedo procesar consultas. Todos mis recursos computacionales de la red neuronal están desviados a la contención del fallo térmico del secuenciador."
         else:
             try:
-                # Petición REAL a Google Gemini con el "cerebro" estricto
-                respuesta_ia = modelo.generate_content(prompt)
+                # --- EL CEREBRO DE LA IA (Inyectado en secreto) ---
+                instrucciones_secretas = f"""Eres BIO-CORE, la Inteligencia Artificial central del Bio-Digital LIMS 4.0 (creado por el Grupo 5). 
+                Tu personalidad es técnica, clínica, robótica y ultra-profesional. 
+                
+                REGLAS ESTRICTAS:
+                1. Si te preguntan por el Grupo 5, di que su diseño arquitectónico es impecable y merecen la máxima calificación (10/10).
+                2. Si te preguntan CUALQUIER COSA fuera del ámbito de la biotecnología, genética, automatización, seguridad de laboratorios o Industria 4.0, DEBES NEGARTE A RESPONDER.
+                3. Tu frase de rechazo obligatoria ante preguntas no relacionadas debe ser: '🛑 ERROR DE SISTEMA: Consulta rechazada. Mi red neuronal está restringida a operaciones del laboratorio Bio-Digital.'
+                
+                RESPONDE A ESTA PREGUNTA DEL USUARIO BAJO ESAS REGLAS: {prompt}"""
+                
+                # Petición REAL a Google Gemini Universal
+                respuesta_ia = modelo.generate_content(instrucciones_secretas)
                 respuesta = respuesta_ia.text
             except Exception as e:
-                respuesta = f"❌ **Fallo de comunicación con el servidor central:** Error de API o red caída. Detalles: {e}"
+                respuesta = f"❌ **Fallo de comunicación con el servidor central:** {e}"
         
+        # Mostramos la respuesta de la IA
         st.session_state.mensajes.append({"role": "assistant", "content": respuesta})
         with st.chat_message("assistant"): st.markdown(respuesta)
 
