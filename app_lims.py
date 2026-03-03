@@ -161,7 +161,7 @@ with col_db1:
             time.sleep(1.5) # Pausa dramática
             try:
                 # !!! ATENCIÓN: PEGA TU ENLACE AQUÍ !!!
-                url_base_datos = "https://docs.google.com/spreadsheets/d/1d4-bVcEzF2ToagSJJYGMnTzXHVEJmOkn_CUGEzCBZXo/edit?usp=sharing" 
+                url_base_datos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTyoeJ1BQqhKmS8Zkjl2J72JJ0KB4zshN8nZtu30466po-nTs7171MuiRbuzLancCS-wt1r58hVE6vj/pub?gid=1441872631&single=true&output=csv" 
                 df_nube = pd.read_csv(url_base_datos)
                 st.success(f"✅ Conexión establecida. {len(df_nube)} muestras sincronizadas.")
                 st.dataframe(df_nube, use_container_width=True, hide_index=True)
@@ -199,6 +199,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
