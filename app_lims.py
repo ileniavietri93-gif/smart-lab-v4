@@ -91,12 +91,18 @@ with col_gemelo:
             showscale=False
         ))
         
-        # IMAGEN DE FONDO (Debe ser un plano visto desde arriba - Top Down)
-        # He puesto un plano técnico de ejemplo por defecto que carga desde internet.
-        fig_2d.add_layout_image(dict(
-            source="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Floor_plan_of_a_house.svg/1024px-Floor_plan_of_a_house.svg.png",
-            xref="x", yref="y", x=0, y=res, sizex=res, sizey=res,
-            sizing="stretch", opacity=0.3, layer="below"
+        # IMAGEN DE FONDO (Leída desde tu GitHub)
+        nombre_imagen = "plano_isometrico.png" 
+        
+        if os.path.exists(nombre_imagen):
+            imagen_fondo = Image.open(nombre_imagen)
+            fig_2d.add_layout_image(dict(
+                source=imagen_fondo,
+                xref="x", yref="y", x=0, y=res, sizex=res, sizey=res,
+                sizing="stretch", opacity=0.4, layer="below"
+            ))
+        else:
+            st.warning(f"⚠️ El servidor en la nube no encuentra la imagen '{plano_isometrico.png}' en tu GitHub.")
         ))
         
         # Ocultamos los ejes para que parezca una pantalla de radar
@@ -198,5 +204,6 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
