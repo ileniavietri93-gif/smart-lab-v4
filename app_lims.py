@@ -6,149 +6,284 @@ import time
 import os
 from PIL import Image
 
-# --- CONFIGURACIÓN DE NÚCLEO ---
-st.set_page_config(page_title="LIMS IA - CONTROL SYSTEM", layout="wide", initial_sidebar_state="collapsed")
+# --- 1. CONFIGURACIÓN Y ESTILOS (DASHBOARD DARK MODE) ---
+st.set_page_config(page_title="LIMS IA Alpha v10.0", layout="wide", initial_sidebar_state="collapsed")
 
-# --- CSS: INTERFAZ DE CRISTAL LÍQUIDO IA ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300;500&display=swap');
 
+    /* Fondo de operaciones y textos básicos */
     .stApp { background-color: #030508; color: #a1b0b8; font-family: 'JetBrains Mono', monospace; }
-
-    /* Contenedores Estilo Rack de Servidores */
+    
+    /* 1. CAJAS DE LOS KPIs (Métricas) */
     .stMetric { 
-        background: rgba(10, 15, 25, 0.95) !important;
-        border: 1px solid #1c2b36 !important;
-        border-left: 5px solid #00e5ff !important;
-        border-radius: 2px !important;
+        background: rgba(10, 15, 25, 0.9) !important;
+        border: 1px solid #1f2937 !important;
+        border-top: 3px solid #00ffcc !important;
+        padding: 15px; 
+        border-radius: 2px; 
+        box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
+    }
+    
+    /* Títulos de las cajas (Muestras, Carga CPU, etc.) - Cyan brillante */
+    div[data-testid="stMetricLabel"] p { 
+        color: #00ffcc !important; 
+        font-family: 'Orbitron', sans-serif;
+        font-size: 0.8em !important; 
+        font-weight: 800 !important; 
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    
+    /* Números de las cajas - Blanco nuclear */
+    div[data-testid="stMetricValue"] { 
+        color: #ffffff !important; 
+        font-family: 'JetBrains Mono', monospace;
+        text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.4); 
     }
 
-    div[data-testid="stMetricLabel"] p { color: #5e7d8a !important; font-family: 'Orbitron', sans-serif; font-size: 0.7rem !important; letter-spacing: 2px; }
-    div[data-testid="stMetricValue"] { color: #ffffff !important; text-shadow: 0 0 10px rgba(0, 229, 255, 0.5); }
+    /* 2. TÍTULOS DE SECCIÓN */
+    h1, h2, h3, h4, .stSubheader, [data-testid="stHeader"], .stMarkdown h1, .stMarkdown h2, .stMarkdown h3 { 
+        color: #ffffff !important; 
+        font-family: 'Orbitron', sans-serif;
+        font-weight: 700 !important;
+        letter-spacing: 2px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+    }
 
-    h1, h2, h3 { font-family: 'Orbitron', sans-serif; color: #ffffff !important; letter-spacing: 2px; }
+    /* 3. ARREGLO DE LAS ADVERTENCIAS */
+    div[data-testid="stAlert"] { 
+        background-color: #111827 !important; 
+        border: 1px solid #ef4444 !important; /* Rojo emergencia */
+        border-radius: 4px !important;
+    }
+    div[data-testid="stAlert"] * { 
+        color: #ffffff !important; 
+    }
 
-    /* Chat de IA Profesional */
-    .stChatMessage { background: rgba(17, 25, 40, 0.8) !important; border: 1px solid #1c2b36 !important; border-radius: 5px !important; }
+    /* Estilo de los botones industriales */
+    .stButton>button { 
+        border-radius: 2px; 
+        background: transparent;
+        border: 1px solid #00ffcc;
+        color: #00ffcc !important;
+        font-family: 'Orbitron', sans-serif;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover { 
+        transform: scale(1.05); 
+        background-color: rgba(0, 255, 204, 0.1);
+        box-shadow: 0 0 15px rgba(0, 255, 204, 0.5); 
+    }
     
-    /* Botones y Tabs */
-    .stTabs [data-baseweb="tab-list"] { background-color: transparent; }
-    .stTabs [data-baseweb="tab"] { color: #5e7d8a !important; }
-    .stTabs [aria-selected="true"] { color: #00e5ff !important; border-bottom: 2px solid #00e5ff !important; }
+    /* Pestañas (Tabs) */
+    .stTabs [data-baseweb="tab-list"] { background-color: #030508; }
+    .stTabs [data-baseweb="tab"] { color: #e2e8f0; font-family: 'Orbitron', sans-serif; font-size: 0.8em; }
+    .stTabs [data-baseweb="tab-highlight"] { background-color: #3b82f6; }
+
+    /* Estilo para los textos en Plots (fuerza visibilidad) */
+    .xtick text, .ytick text, .ztick text { fill: white !important; font-family: 'JetBrains Mono' !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- HEADER ---
-c1, c2 = st.columns([4, 1])
+# --- HEADER DE OPERACIONES DE MISIÓN CRÍTICA ---
+c1, c2, c3 = st.columns([3, 1, 1])
 with c1:
-    st.markdown("<h1 style='margin:0;'>🖥️ LIMS_IA // CORE CONTROL</h1>", unsafe_allow_html=True)
-    st.caption("AI-POWERED LABORATORY MANAGEMENT SYSTEM // v9.0")
+    st.markdown("<h1>🧬 BIO-DIGITAL OS <span style='color:#00ffcc; font-size:0.5em;'>ALPHA_V10.0</span></h1>", unsafe_allow_html=True)
+    st.caption("AI-POWERED LABORATORY SIMULATION AND CONTROL CORE // SYSTEMS NOMINAL")
 with c2:
-    st.markdown(f"<div style='text-align:right; color:#00e5ff; font-family:Orbitron; padding-top:20px;'>{time.strftime('%H:%M:%S')} UTC</div>", unsafe_allow_html=True)
-
+    st.markdown(f"<div style='text-align:right; color:#00ffcc; font-family:Orbitron; padding-top:20px;'>{time.strftime('%H:%M:%S')} UTC</div>", unsafe_allow_html=True)
 st.divider()
 
-# --- SIDEBAR CONTROL ---
+# --- PANEL LATERAL TÉCNICO ---
 with st.sidebar:
-    st.markdown("### 🛠️ SUBSISTEMAS")
-    simular_alerta = st.toggle("TEST DE ESTRÉS TÉRMICO")
-    encriptacion = st.toggle("CIFRADO CUÁNTICO", value=True)
+    st.image("https://cdn-icons-png.flaticon.com/512/2103/2103322.png", width=60)
+    st.markdown("### 🎛️ PANEL DE CONTROL")
+    simular_alerta = st.toggle("SIMULAR FALLO TÉRMICO (ESTRÉS)", key="alerta_simulada")
+    seguridad = st.toggle("BLOQUEO CUÁNTICO", value=True)
     st.markdown("---")
-    if st.button("🔄 REINICIAR IA"):
-        st.session_state.messages = []
-        st.rerun()
-
-# --- KPIs ---
-m1, m2, m3, m4 = st.columns(4)
-m1.metric("FLUJO MUESTRAS", "12,450", "+12.5%")
-m2.metric("IA LOAD", "98.8%", "STABLE")
-m3.metric("CORE TEMP", "48.2°C" if simular_alerta else "21.4°C", "+26.8°" if simular_alerta else "NOMINAL", delta_color="inverse")
-m4.metric("RED IOT", "SECURE", "AES-256")
-
-# --- BLOQUE CENTRAL: GEMELO DIGITAL 3D ---
-st.markdown("### 🏔️ TOPOGRAFÍA TÉRMICA EN TIEMPO REAL (GEMELO DIGITAL)")
-col_3d, col_2d = st.columns([1.4, 0.6])
-
-with col_3d:
-    # --- GRÁFICA TÉRMICA 3D REACTIVA ---
-    x_range = np.linspace(-5, 5, 50)
-    y_range = np.linspace(-5, 5, 50)
-    x, y = np.meshgrid(x_range, y_range)
-    
-    # Base de temperatura normal (ruido sutil)
-    z = np.random.uniform(20.5, 21.5, size=x.shape)
-    
     if simular_alerta:
-        # Generar "montaña" térmica espectacular en el centro
-        z += 30 * np.exp(-(x**2 + y**2) / 2) # Efecto Gaussiano de calor
-    
-    fig3d = go.Figure(data=[go.Surface(
-        z=z, 
-        colorscale='Hot' if simular_alerta else 'Viridis',
-        showscale=False,
-        contours = {"z": {"show": True, "start": 20, "end": 60, "size": 2, "color":"white"}}
-    )])
-    
-    fig3d.update_layout(
-        scene=dict(
-            xaxis_title='EJE X', yaxis_title='EJE Y', zaxis_title='TEMP °C',
-            xaxis=dict(backgroundcolor="rgb(5, 7, 10)", gridcolor="gray", showbackground=True),
-            yaxis=dict(backgroundcolor="rgb(5, 7, 10)", gridcolor="gray", showbackground=True),
-            zaxis=dict(backgroundcolor="rgb(5, 7, 10)", gridcolor="gray", showbackground=True, range=[15, 60] if simular_alerta else [15, 30]),
-        ),
-        margin=dict(l=0, r=0, b=0, t=0), 
-        height=500,
-        paper_bgcolor='rgba(0,0,0,0)'
-    )
-    st.plotly_chart(fig3d, use_container_width=True)
+        st.error("ALERTA: SOBRECALENTAMIENTO EN EL SECTOR 7B")
+        st.snow()
+    else:
+        st.info("LATENCIA: 4.2ms // PAQUETES: 100% // STATUS: SECURE")
 
-with col_2d:
-    st.markdown("#### 📡 MAPA DE CALOR 2D")
-    fig2d = go.Figure(data=go.Heatmap(z=z, colorscale='Hot' if simular_alerta else 'Viridis', showscale=False))
-    fig2d.update_layout(xaxis_visible=False, yaxis_visible=False, margin=dict(l=0, r=0, b=0, t=0), height=250, paper_bgcolor='rgba(0,0,0,0)')
-    st.plotly_chart(fig2d, use_container_width=True)
+# --- KPIs CON EFECTO GLOW NEÓN ---
+k1, k2, k3, k4 = st.columns(4)
+k1.metric("🧬 MUESTRAS", "12,450", delta="Prioridad A1")
+k2.metric("⚡ CARGA CPU IA", "94.2%", delta="Nominal")
+k3.metric("🌡️ TEMP. GENERAL", "48.5°C" if simular_alerta else "21.5°C", delta="+27.0°C" if simular_alerta else "-0.2°C", delta_color="inverse")
+k4.metric("🛡️ ESTADO RED IOT", "SECURE" if seguridad else "OPEN", delta="Cifrado" if seguridad else "Vulnerable")
+
+# --- GEMELO DIGITAL: PROYECCIÓN SOBRE PLANO REAL Y SUPERFICIE 3D ---
+col_gemelo, col_sankey = st.columns(2)
+
+with col_gemelo:
+    st.markdown("### 🌐 Gemelo Digital // Planta")
+    tab_2d, tab_3d = st.tabs(["🗺️ Isométrico (Overlay IoT)", "🌋 Topografía de Datos"])
     
-    st.markdown("#### 🖥️ TERMINAL")
-    st.code(f"> MONITORING...\n> " + ("ALERTA TÉRMICA!" if simular_alerta else "SYSTEMS NOMINAL"), language="bash")
+    with tab_2d:
+        st.caption("Overlay térmico sobre plano técnico real.")
+        
+        # 1. Generamos el Mapa de Calor (Heatmap)
+        res = 60
+        z_2d = np.random.uniform(20.5, 21.5, size=(res, res)) # Ruido de fondo suave
+        if simular_alerta:
+            # Foco de calor en el lado derecho
+            for i in range(res):
+                for j in range(res):
+                    dist = np.sqrt((i-res//2)**2 + (j-res*2//3)**2)
+                    if dist < 15: z_2d[i,j] = 50 - dist*1.5
+
+        fig_2d = go.Figure()
+        
+        # Capa 1: EL HEATMAP CON TRANSPARENCIA (opacity=0.45)
+        # Usamos zsmooth='best' para el difuminado técnico
+        fig_2d.add_trace(go.Heatmap(
+            z=z_2d, 
+            colorscale='Inferno' if simular_alerta else 'Tealgrn',
+            opacity=0.45, 
+            zsmooth='best', 
+            showscale=True,
+            colorbar=dict(title="°C", tickcolor="white", font=dict(color="white"))
+        ))
+        
+        # Capa 2: LA IMAGEN LOCAL plano_isometrico.png COMO FONDO (Si existe)
+        # Esto soluciona tu problema: carga la imagen y la pone DEBAJO del color
+        nombre_imagen = "plano_isometrico.png" 
+        if os.path.exists(nombre_imagen):
+            imagen_fondo = Image.open(nombre_imagen)
+            fig_2d.add_layout_image(dict(
+                source=imagen_fondo, # Python PIL procesa la imagen local
+                xref="x", yref="y", x=0, y=res, sizex=res, sizey=res,
+                sizing="stretch", opacity=0.8, layer="below"
+            ))
+        else:
+            st.warning(f"⚠️ No se encuentra '{nombre_imagen}' en GitHub. Usando mapa sin plano.")
+        
+        # Ocultamos ejes para que parezca una pantalla de radar
+        fig_2d.update_layout(
+            xaxis=dict(visible=False), yaxis=dict(visible=False),
+            margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)'
+        )
+        st.plotly_chart(fig_2d, use_container_width=True)
+        
+    with tab_3d:
+        st.caption("Vista topográfica pura de los datos térmicos IoT. Rótala con el ratón.")
+        x, y = np.linspace(-5, 5, 50), np.linspace(-5, 5, 50)
+        xGrid, yGrid = np.meshgrid(y, x)
+        z_3d = np.sin(xGrid) * 0.1 + np.cos(yGrid) * 0.1 + 21
+        if simular_alerta: z_3d = z_3d + 30 * np.exp(-(xGrid**2 + yGrid**2) / 2)
+            
+        fig3d = go.Figure(data=[go.Surface(
+            z=z_3d, 
+            colorscale='Inferno' if simular_alerta else 'Tealgrn', 
+            showscale=False,
+            contours = {"z": {"show": True, "start": 22, "end": 50, "size": 2, "color":"white"}}
+        )])
+        
+        # Mostramos la caja matemática para que parezca un simulador
+        fig3d.update_layout(
+            scene=dict(
+                xaxis_title='X (Metros)', 
+                yaxis_title='Y (Metros)', 
+                zaxis_title='Temp °C',
+                camera=dict(eye=dict(x=1.3, y=1.3, z=0.8)),
+                xaxis=dict(color="white"),
+                yaxis=dict(color="white"),
+                zaxis=dict(color="white")
+            ), 
+            margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)'
+        )
+        st.plotly_chart(fig3d, use_container_width=True)
+
+with col_sankey:
+    # EL DIAGRAMA SANKEY SIGUE SIENDO VITAL PARA LA TRAZABILIDAD
+    st.subheader("⛓️ TRAZABILIDAD IOT")
+    if simular_alerta:
+        fuentes, destinos, valores = [0, 1, 1, 2, 2], [1, 2, 4, 4, 3], [100, 20, 80, 20, 0]
+    else:
+        fuentes, destinos, valores = [0, 1, 2, 3], [1, 2, 3, 5], [100, 95, 90, 85]
+        
+    fig_sankey = go.Figure(data=[go.Sankey(
+        textfont = dict(color="#ffffff", size=14, family="Arial"),
+        node = dict(pad=15, thickness=20, line=dict(color="white", width=0.5), label=["Recepción", "Extracción", "PCR", "Secuenciadores", "Emergencia (Neveras)", "IA Diagnóstico"], color=["blue", "blue", "blue", "red" if simular_alerta else "blue", "cyan", "green"]),
+        link = dict(source=fuentes, target=destinos, value=valores, color="rgba(100, 150, 250, 0.4)")
+    )])
+    fig_sankey.update_layout(height=400, margin=dict(l=10, r=10, b=10, t=10), paper_bgcolor='rgba(0,0,0,0)', font=dict(color="white"))
+    st.plotly_chart(fig_sankey, use_container_width=True)
 
 st.divider()
 
-# --- BLOQUE FINAL: IA CONVERSACIONAL Y DATOS ---
-c_chat, c_data = st.columns([1, 1])
+# --- CONEXIÓN A GOOGLE SHEETS (CLOUD LIMS) + TELEMETRÍA ---
+st.subheader("☁️ CLOUD LIMS // DATA INTEGRATION")
+col_db1, col_db2 = st.columns([2, 1])
 
-with c_chat:
-    st.markdown("### 💬 NÚCLEO COGNITIVO IA")
-    if "messages" not in st.session_state:
-        st.session_state.messages = [{"role": "assistant", "content": "Sistema LIMS listo. ¿Qué protocolo desea ejecutar?"}]
+with col_db1:
+    if st.button("🔄 Sincronizar Servidor Cloud Hospitalario"):
+        with st.spinner('Petición API en curso... Conectando a servidores seguros...'):
+            time.sleep(1.2) # Pausa dramática
+            try:
+                # !!! ATENCIÓN: TU ENLACE AQUÍ !!!
+                url_base_datos = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTyoeJ1BQqhKmS8Zkjl2J72JJ0KB4zshN8nZtu30466po-nTs7171MuiRbuzLancCS-wt1r58hVE6vj/pub?gid=1441872631&single=true&output=csv" 
+                df_nube = pd.read_csv(url_base_datos)
+                st.success(f"CONEXIÓN OK: {len(df_nube)} registros sincronizados desde la nube.")
+                st.dataframe(df_nube, use_container_width=True, hide_index=True)
+                
+                with col_db2:
+                    st.write("#### 📊 ANÁLISIS DE ESTABILIDAD")
+                    t_data = np.linspace(0, 10, 20)
+                    temp_base = 21.5 + np.random.normal(0, 0.2, 20)
+                    if simular_alerta: temp_base[15:] += 15
+                    fig_tel = go.Figure()
+                    fig_tel.add_trace(go.Scatter(x=t_data, y=temp_base, mode='lines+markers', line=dict(color='#00ffcc', width=3)))
+                    fig_tel.add_hrect(y0=20, y1=23, fillcolor="green", opacity=0.1, line_width=0)
+                    fig_tel.update_layout(height=280, margin=dict(t=10, b=10, l=10, r=10), paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color="white"), xaxis=dict(color="white"), yaxis=dict(color="white"))
+                    st.plotly_chart(fig_tel, use_container_width=True)
+            except Exception as e:
+                st.error(f"⚠️ Error de enlace Cloud. Revisa el enlace CSV en GitHub.")
 
-    # Mostrar mensajes previos (limitado a los últimos 4 por espacio)
-    for msg in st.session_state.messages[-4:]:
-        with st.chat_message(msg["role"]):
-            st.markdown(msg["content"])
+# --- SECCIÓN FINAL: ASISTENTE IA Y TERMINAL ---
+st.divider()
+col_chat, col_output = st.columns([1, 1])
 
-    if prompt := st.chat_input("Escriba comando o consulta a la IA..."):
+with col_chat:
+    st.subheader("💬 NÚCLEO COGNITIVO IA LIMS")
+    if "messages" not in st.session_state: st.session_state.messages = [{"role": "assistant", "content": "Bienvenido al Núcleo IA del LIMS. Ejecute comando o solicite protocolo..."}]
+    # Mostramos los últimos mensajes para que no colapse la pantalla
+    for msg in st.session_state.messages[-3:]:
+        with st.chat_message(msg["role"]): st.markdown(msg["content"])
+    
+    if prompt := st.chat_input("Consulta protocolos..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        with st.chat_message("user"): st.markdown(prompt)
         
-        with st.chat_message("assistant"):
-            if simular_alerta:
-                response = "⚠️ ERROR CRÍTICO: El núcleo térmico excede los 45°C. Protocolo de seguridad activado. Consultas suspendidas."
-            else:
-                response = f"Analizando '{prompt}'... Sincronizando con base de datos LIMS. Estado del laboratorio: Óptimo."
-            st.markdown(response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
+        # RESPUESTA IA REACTIVA
+        if simular_alerta:
+            respuesta = "⚠️ BLOQUEO OPERATIVO: ALERTA TÉRMICA DETECTADA EN SECTOR 7B. Consultas suspendidas. Protocolo de emergencia activado."
+        else:
+            respuesta = f"Análisis de '{prompt}': Sistemas operativos nominales. Proceso de validación completado con éxito."
+        
+        st.session_state.messages.append({"role": "assistant", "content": respuesta})
+        with st.chat_message("assistant"): st.markdown(respuesta)
+        #st.rerun() # Eliminamos rerun para evitar doble carga
 
-with c_data:
-    st.markdown("### ☁️ CLOUD DATABASE SYNC")
-    if st.button("📥 SINCRONIZAR CON NUBE"):
-        try:
-            url = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTyoeJ1BQqhKmS8Zkjl2J72JJ0KB4zshN8nZtu30466po-nTs7171MuiRbuzLancCS-wt1r58hVE6vj/pub?gid=1441872631&single=true&output=csv"
-            df = pd.read_csv(url)
-            st.dataframe(df.head(10), use_container_width=True, hide_index=True)
-            st.success("DATOS HOSPITALARIOS ACTUALIZADOS")
-        except:
-            st.error("FALLO DE CONEXIÓN")
+with col_output:
+    st.subheader("🖥️ TERMINAL DE SUBSISTEMAS")
+    # Usamos un bloque de código puro para mayor realismo
+    terminal_txt = f"""
+    [{time.strftime('%H:%M:%S')}] LIMS CORE INITIALIZED... OK
+    [{time.strftime('%H:%M:%S')}] IOT SENSOR NETWORK: CONNECTED
+    """
+    if simular_alerta:
+        terminal_txt += f"[{time.strftime('%H:%M:%S')}] ALERT: THERMAL OVERLOAD DETECTED\n"
+        terminal_txt += f"[{time.strftime('%H:%M:%S')}] ACTION: EXECUTING SECTOR ISOLATION"
+    else:
+        terminal_txt += f"[{time.strftime('%H:%M:%S')}] ALL SYSTEMS NOMINAL..."
+        
+    st.code(terminal_txt, language="bash")
 
 
