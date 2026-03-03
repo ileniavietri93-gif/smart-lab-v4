@@ -65,66 +65,72 @@ k4.metric("🛡️ Integridad Red", "100%" if seguridad else "82%", delta="Encri
 col_gemelo, col_sankey = st.columns(2)
 
 with col_gemelo:
-    # Usamos pestañas para separar la vista Isométrica (la "App") de la Topografía de Datos
-    tab_iso, tab_3d = st.tabs(["🗺️ Isométrico 3D: Planta (Overlay IoT Real)", "🌋 Topografía Térmica: Datos raw 3D"])
+    tab_2d, tab_3d = st.tabs(["🗺️ Plano Cenital (Cámara Térmica)", "🌋 Holograma 3D"])
     
-    with tab_iso:
-        st.caption("Mapa Térmico de Sensores IoT superpuesto sobre plano isométrico real.")
+    with tab_2d:
+        st.caption("Monitorización térmica difuminada sobre plano técnico.")
         
-        # INTENTAMOS CARGAR LA IMAGEN ISOMÉTRICA LOCAL
-        if os.path.exists("plano_isometrico.png"):
-            img_iso = Image.open("plano_isometrico.png")
-            # Obtenemos dimensiones para ajustar la resolución del heatmap
-            ancho_img, alto_img = img_iso.size
-        else:
-            st.error("⚠️ No se encuentra 'plano_isometrico.png' en la carpeta. Usando mapa de calor sin plano.")
-            img_iso = None
-
-        # Generamos el Heatmap (Alta resolución para el overlay)
+        # Generamos el Heatmap
         res = 60
-        z_iso = np.random.uniform(20, 22, size=(res, res)) # Ruido de fondo
+        z_2d = np.random.uniform(20.5, 21.5, size=(res, res)) # Ruido de fondo suave
         if simular_alerta:
-            # Creamos una "mancha" de calor en la zona central-derecha (ej: secuenciador)
+            # Foco de calor en el lado derecho
             for i in range(res):
                 for j in range(res):
-                    dist = np.sqrt((i-res//2)**2 + (j-res*2//3)**2)
-                    if dist < 15: z_iso[i,j] = 50 - dist*2
+                    dist = np.sqrt((i-30)**2 + (j-45)**2)
+                    if dist < 20: z_2d[i,j] = 50 - dist*1.5
 
-        fig_iso = go.Figure()
+        fig_2d = go.Figure()
         
-        # Capa 1: El Heatmap con Opacidad del 60%
-        fig_iso.add_trace(go.Heatmap(
-            z=z_iso, 
-            colorscale='Hot' if simular_alerta else 'Viridis',
-            opacity=0.6 if img_iso else 1.0, 
-            showscale=True,
-            colorbar=dict(ticksuffix="°C")
+        # EL SECRETO VISUAL: zsmooth='best' difumina los cuadros creando un efecto térmico real
+        fig_2d.add_trace(go.Heatmap(
+            z=z_2d, 
+            colorscale='Inferno' if simular_alerta else 'Viridis',
+            opacity=0.6, 
+            zsmooth='best', 
+            showscale=False
         ))
         
-        # Capa 2: La Imagen Isométrica 3D por debajo
-        if img_iso:
-            fig_iso.add_layout_image(dict(
-                source=img_iso, # Python PIL procesa la imagen local
-                xref="x", yref="y", x=0, y=res, sizex=res, sizey=res,
-                sizing="stretch", opacity=0.9, layer="below"
-            ))
+        # IMAGEN DE FONDO (Debe ser un plano visto desde arriba - Top Down)
+        # He puesto un plano técnico de ejemplo por defecto que carga desde internet.
+        fig_2d.add_layout_image(dict(
+            source="https://upload.wikimedia.org/wikipedia/commons/thumb/1/1b/Floor_plan_of_a_house.svg/1024px-Floor_plan_of_a_house.svg.png",
+            xref="x", yref="y", x=0, y=res, sizex=res, sizey=res,
+            sizing="stretch", opacity=0.3, layer="below"
+        ))
         
-        fig_iso.update_layout(
+        # Ocultamos los ejes para que parezca una pantalla de radar
+        fig_2d.update_layout(
             xaxis=dict(visible=False), yaxis=dict(visible=False),
             margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)'
         )
-        st.plotly_chart(fig_iso, use_container_width=True)
+        st.plotly_chart(fig_2d, use_container_width=True)
         
     with tab_3d:
-        # MANTENEMOS EL "VOLCÁN" 3D DE DATOS RAW (Por si acaso)
-        st.caption("Vista topográfica pura de los datos térmicos IoT. Rótala con el ratón.")
+        st.caption("Gemelo Digital Holográfico (Rótalo con el ratón)")
         x, y = np.linspace(-5, 5, 50), np.linspace(-5, 5, 50)
         xGrid, yGrid = np.meshgrid(y, x)
         z_3d = np.sin(xGrid) * 0.1 + np.cos(yGrid) * 0.1 + 21
         if simular_alerta: z_3d = z_3d + 30 * np.exp(-(xGrid**2 + yGrid**2) / 2)
             
-        fig3d = go.Figure(data=[go.Surface(z=z_3d, colorscale='Hot' if simular_alerta else 'Viridis', showscale=False)])
-        fig3d.update_layout(scene=dict(xaxis_title='X (Metros)', yaxis_title='Y (Metros)', zaxis_title='Temp °C', camera=dict(eye=dict(x=1.3, y=1.3, z=1.1))), margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)')
+        fig3d = go.Figure(data=[go.Surface(
+            z=z_3d, 
+            colorscale='Inferno' if simular_alerta else 'Viridis', 
+            showscale=False,
+            # Líneas topográficas futuristas
+            contours = {"z": {"show": True, "start": 22, "end": 50, "size": 2, "color": "white"}}
+        )])
+        
+        # Ocultamos la "caja" matemática para que el gráfico parezca flotar
+        fig3d.update_layout(
+            scene=dict(
+                xaxis=dict(visible=False), 
+                yaxis=dict(visible=False), 
+                zaxis=dict(visible=False), 
+                camera=dict(eye=dict(x=1.3, y=1.3, z=0.8))
+            ), 
+            margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)'
+        )
         st.plotly_chart(fig3d, use_container_width=True)
 
 with col_sankey:
@@ -192,4 +198,5 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
