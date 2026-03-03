@@ -26,41 +26,23 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
     }
     
-    /* 2. TEXTO DE LAS CAJAS (Títulos más brillantes y en negrita) */
-    div[data-testid="stMetricLabel"] p { 
-        color: #00ffcc !important; /* Cyan neón en lugar de gris */
+    /* 2. TÍTULOS DE LAS CAJAS (Muestras, Carga CPU, etc.) */
+    /* Atacamos todas las etiquetas posibles para forzar a Streamlit */
+    div[data-testid="stMetricLabel"],
+    div[data-testid="stMetricLabel"] > div,
+    div[data-testid="stMetricLabel"] p,
+    div[data-testid="stMetricLabel"] span,
+    div[data-testid="stMetricLabel"] label { 
+        color: #00ffcc !important; /* Cyan brillante */
         font-size: 1.15em !important; 
-        font-weight: bold !important; 
+        font-weight: 800 !important; 
     }
     
     /* 3. NÚMEROS GRANDES (Blanco puro con brillo) */
-    div[data-testid="stMetricValue"] { 
+    div[data-testid="stMetricValue"],
+    div[data-testid="stMetricValue"] > div { 
         color: #ffffff !important; 
-        text-shadow: 0px 0px 10px rgba(255, 255, 255, 0.8); 
-    }
-
-    /* 4. ARREGLO DE LAS ADVERTENCIAS (Alerts, Warnings, Errors) */
-    div[data-testid="stAlert"] { 
-        background-color: #111827 !important; /* Fondo oscuro a juego con la app */
-        border: 1px solid #3b82f6 !important; /* Borde azul para enmarcarlas */
-        border-radius: 8px !important;
-    }
-    div[data-testid="stAlert"] p { 
-        color: #ffffff !important; /* Texto forzado a blanco puro brillante */
-        font-weight: 500 !important;
-        font-size: 1.05em !important;
-    }
-
-    /* Estilo de los botones */
-    .stButton>button { border-radius: 5px; background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%); border: none; font-weight: bold; transition: all 0.3s ease; color: white !important;}
-    .stButton>button:hover { transform: scale(1.05); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); }
-    
-    /* Pestañas (Tabs) */
-    .stTabs [data-baseweb="tab-list"] { background-color: #0b0f19; }
-    .stTabs [data-baseweb="tab"] { color: #e2e8f0; }
-    .stTabs [data-baseweb="tab-highlight"] { background-color: #3b82f6; }
-    </style>
-    """, unsafe_allow_html=True)
+        text-shadow: 0px 0px 10px rgba(255,
 
 # --- HEADER ---
 c1, c2, c3 = st.columns([3, 1, 1])
@@ -242,6 +224,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
