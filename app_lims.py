@@ -32,7 +32,7 @@ st.markdown("""
     div[data-testid="stMetricLabel"] p,
     div[data-testid="stMetricLabel"] span,
     div[data-testid="stMetricLabel"] label { 
-        color: #00ffcc !important; 
+        color: #ebe1c9 !important; 
         font-size: 1.15em !important; 
         font-weight: 800 !important; 
     }
@@ -252,6 +252,7 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
 
 
 
