@@ -139,6 +139,7 @@ with col_gemelo:
                     if dist < 15: z_2d[i,j] = 50 - dist*1.5
 
         fig_2d = go.Figure()
+        
         # Capa 1: EL HEATMAP CON TRANSPARENCIA (opacity=0.45)
         # Usamos zsmooth='best' para el difuminado técnico
         fig_2d.add_trace(go.Heatmap(
@@ -147,18 +148,15 @@ with col_gemelo:
             opacity=0.45, 
             zsmooth='best', 
             showscale=True,
-            # 🛠️ EL ARREGLO ESTÁ AQUÍ: Cambiamos 'font' por 'tickfont'
             colorbar=dict(title="°C", tickcolor="white", tickfont=dict(color="white"))
-        ))
         ))
         
         # Capa 2: LA IMAGEN LOCAL plano_isometrico.png COMO FONDO (Si existe)
-        # Esto soluciona tu problema: carga la imagen y la pone DEBAJO del color
         nombre_imagen = "plano_isometrico.png" 
         if os.path.exists(nombre_imagen):
             imagen_fondo = Image.open(nombre_imagen)
             fig_2d.add_layout_image(dict(
-                source=imagen_fondo, # Python PIL procesa la imagen local
+                source=imagen_fondo, 
                 xref="x", yref="y", x=0, y=res, sizex=res, sizey=res,
                 sizing="stretch", opacity=0.8, layer="below"
             ))
@@ -254,6 +252,7 @@ col_chat, col_output = st.columns([1, 1])
 with col_chat:
     st.subheader("💬 NÚCLEO COGNITIVO IA LIMS")
     if "messages" not in st.session_state: st.session_state.messages = [{"role": "assistant", "content": "Bienvenido al Núcleo IA del LIMS. Ejecute comando o solicite protocolo..."}]
+    
     # Mostramos los últimos mensajes para que no colapse la pantalla
     for msg in st.session_state.messages[-3:]:
         with st.chat_message(msg["role"]): st.markdown(msg["content"])
@@ -270,7 +269,6 @@ with col_chat:
         
         st.session_state.messages.append({"role": "assistant", "content": respuesta})
         with st.chat_message("assistant"): st.markdown(respuesta)
-        #st.rerun() # Eliminamos rerun para evitar doble carga
 
 with col_output:
     st.subheader("🖥️ TERMINAL DE SUBSISTEMAS")
@@ -286,6 +284,3 @@ with col_output:
         terminal_txt += f"[{time.strftime('%H:%M:%S')}] ALL SYSTEMS NOMINAL..."
         
     st.code(terminal_txt, language="bash")
-
-
-
