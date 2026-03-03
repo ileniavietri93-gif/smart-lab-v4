@@ -6,16 +6,14 @@ import plotly.express as px
 import time
 
 # --- 1. CONFIGURACIÓN EXTREMA Y DISEÑO LIMPIO ---
-st.set_page_config(page_title="Bio-Digital OS v4.0", layout="wide", initial_sidebar_state="expanded")
+st.set_page_config(page_title="Bio-Digital OS v4.1", layout="wide", initial_sidebar_state="expanded")
 
-# CSS Corregido: Textos legibles y contrastes perfectos
+# CSS: Textos legibles y contrastes perfectos
 st.markdown("""
     <style>
-    /* Eliminado el color global que rompía las alertas */
     .stMetric { background-color: #111827; border: 1px solid #1f2937; border-left: 4px solid #3b82f6; padding: 15px; border-radius: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
     .stButton>button { border-radius: 5px; background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 100%); color: white !important; font-weight: bold; border: none; transition: all 0.3s ease; }
     .stButton>button:hover { transform: scale(1.02); box-shadow: 0 0 15px rgba(59, 130, 246, 0.5); border: none; }
-    /* Ajuste de consola para que parezca una pantalla de código legible */
     .terminal-box { font-family: 'Courier New', monospace; background-color: #0d1117; padding: 15px; border-radius: 5px; border: 1px solid #30363d; color: #58a6ff; }
     </style>
     """, unsafe_allow_html=True)
@@ -84,38 +82,48 @@ with col_sankey:
 
 # --- FILA 3: BASE DE DATOS EXTERNA (GOOGLE SHEETS) ---
 st.divider()
-st.subheader("☁️ Conexión LIMS en la Nube (Google Sheets API)")
-st.write("Sincronización en tiempo real con la base de datos externa del hospital.")
+st.subheader("☁️ Conexión LIMS en la Nube (Ingreso de Muestras)")
+
+# Añadimos un enlace elegante para que el público o vosotros podáis abrir el formulario
+st.markdown(f"**📲 Participación en vivo:** [Haz clic aquí para enviar una muestra al laboratorio](https://docs.google.com/forms/d/e/1FAIpQLScxqVuBCc0AvhWhpbC_kiuChL2xAk1DpmmYGZr4Y0FSYY2LFQ/viewform?usp=header) o escanea el código QR del proyector.")
 
 col_db, col_chart = st.columns([2, 1])
 
 with col_db:
-    if st.button("🔄 Sincronizar Base de Datos Externa"):
-        with st.spinner('Conectando a servidor remoto (Google Cloud)...'):
+    if st.button("🔄 Sincronizar Muestras Recientes"):
+        with st.spinner('Conectando a servidor remoto (Google Cloud)... extrayendo respuestas...'):
             time.sleep(1) # Simula tiempo de red
             try:
-                # AQUÍ ESTÁ TU ENLACE REAL
+                # ENLACE ACTUALIZADO: APUNTA DIRECTAMENTE A LA PESTAÑA DE RESPUESTAS DEL FORMULARIO
                 url_csv = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTyoeJ1BQqhKmS8Zkjl2J72JJ0KB4zshN8nZtu30466po-nTs7171MuiRbuzLancCS-wt1r58hVE6vj/pub?gid=1441872631&single=true&output=csv"
                 df_nube = pd.read_csv(url_csv)
                 
-                st.success("✅ Conexión establecida. Tabla sincronizada.")
-                st.dataframe(df_nube, use_container_width=True, hide_index=True)
+                # Formatear la tabla si tiene la columna "Marca temporal" para que quede más limpia
+                if 'Marca temporal' in df_nube.columns:
+                    df_nube = df_nube.rename(columns={'Marca temporal': 'Fecha/Hora'})
                 
-                # Gráfica automática basada en tu hoja (Si pusiste la columna 'Urgencia')
+                st.success("✅ Conexión establecida. Tabla sincronizada en tiempo real.")
+                st.dataframe(df_nube.tail(10), use_container_width=True, hide_index=True) # Muestra las últimas 10 muestras para no saturar
+                
+                # Gráfica automática: Buscar la columna de Urgencia (el formulario la puede llamar 'Urgencia', 'Nivel de urgencia', etc.)
+                # Buscamos de forma flexible si existe alguna columna que contenga la palabra 'Urgencia'
+                col_urgencia = [col for col in df_nube.columns if 'Urgencia' in col]
+                
                 with col_chart:
                     st.write("**Distribución de Muestras en Vivo**")
-                    if 'Urgencia' in df_nube.columns:
-                        fig_pie = px.pie(df_nube, names='Urgencia', hole=0.4, color_discrete_sequence=px.colors.sequential.Teal)
+                    if col_urgencia:
+                        nombre_columna = col_urgencia[0]
+                        fig_pie = px.pie(df_nube, names=nombre_columna, hole=0.4, color_discrete_sequence=px.colors.sequential.Teal)
                         fig_pie.update_layout(height=250, margin=dict(t=0, b=0, l=0, r=0), paper_bgcolor='rgba(0,0,0,0)')
                         st.plotly_chart(fig_pie, use_container_width=True)
                     else:
-                        st.info("La columna 'Urgencia' no se detectó para el gráfico. Se muestra solo la tabla.")
+                        st.info("Gráfica en espera: Asegúrate de tener una pregunta de 'Urgencia' en el formulario.")
             except Exception as e:
-                st.error(f"⚠️ Error de conexión: {e}")
+                st.error(f"⚠️ Aún no hay datos suficientes o error de conexión. Asegúrate de rellenar el formulario al menos una vez. Detalles: {e}")
     else:
-        st.info("Base de datos en reposo. Pulsa 'Sincronizar' para extraer los datos en vivo.")
+        st.info("Base de datos en reposo. Pulsa 'Sincronizar' para ver las respuestas del público.")
 
-# --- FILA 4: CHATBOT Y TERMINAL DE ALERTAS (LEGILES) ---
+# --- FILA 4: CHATBOT Y TERMINAL DE ALERTAS ---
 st.divider()
 col_chat, col_term = st.columns([1, 1])
 
@@ -133,10 +141,8 @@ with col_chat:
 
 with col_term:
     st.subheader("🖥️ Terminal de Subsistemas")
-    # Usamos markdown con HTML para simular una terminal hacker limpia y legible
     if genetica: st.markdown("<div class='terminal-box'>[MÓDULO 1] Análisis Exómico finalizado.<br>Variantes detectadas: 2<br>Cruzando datos: OK</div>", unsafe_allow_html=True)
     elif vision: st.markdown("<div class='terminal-box'>[MÓDULO 2] Segmentación de células activada.<br>Clasificando fenotipos...<br>Precisión: 99.8%</div>", unsafe_allow_html=True)
     elif roi: st.markdown("<div class='terminal-box'>[MÓDULO 4] Calculando TCO...<br>Ahorro energético: 14%<br>Eficiencia: +35%</div>", unsafe_allow_html=True)
     elif simular_alerta: st.error("🚨 [SYS_HALT] ERROR CRÍTICO.\nMotores de secuenciador sobrecalentados.\nDesviando muestras a criogenia.")
-
     else: st.markdown("<div class='terminal-box'>Sistema a la espera de comandos...<br>Monitorizando sensores IoT...</div>", unsafe_allow_html=True)
