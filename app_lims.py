@@ -95,7 +95,7 @@ with col_gemelo:
         # Capa 1: El Heatmap con Opacidad del 60%
         fig_iso.add_trace(go.Heatmap(
             z=z_iso, 
-            colorscale='Hot' if simular_alerta else 'Teal_grn',
+            colorscale='Hot' if simular_alerta else 'Viridis',
             opacity=0.6 if img_iso else 1.0, 
             showscale=True,
             colorbar=dict(ticksuffix="°C")
@@ -123,7 +123,7 @@ with col_gemelo:
         z_3d = np.sin(xGrid) * 0.1 + np.cos(yGrid) * 0.1 + 21
         if simular_alerta: z_3d = z_3d + 30 * np.exp(-(xGrid**2 + yGrid**2) / 2)
             
-        fig3d = go.Figure(data=[go.Surface(z=z_3d, colorscale='Hot' if simular_alerta else 'Teal_grn', showscale=False)])
+        fig3d = go.Figure(data=[go.Surface(z=z_3d, colorscale='Hot' if simular_alerta else 'Viridis', showscale=False)])
         fig3d.update_layout(scene=dict(xaxis_title='X (Metros)', yaxis_title='Y (Metros)', zaxis_title='Temp °C', camera=dict(eye=dict(x=1.3, y=1.3, z=1.1))), margin=dict(l=0, r=0, b=0, t=0), height=380, paper_bgcolor='rgba(0,0,0,0)')
         st.plotly_chart(fig3d, use_container_width=True)
 
@@ -192,3 +192,4 @@ with col_output:
         elif roi: st.info(">>> [MÓDULO 4] TCO calculado. ROI proyectado: 145% anual.")
         elif simular_alerta: st.error(">>> [SYS_HALT] FATAL ERROR 0x00B. Motores sobrecalentados. Protocolo criogénico activado.")
         else: st.write(">>> Monitorizando sensores IoT de planta...\n>>> Esperando comandos de operadores.")
+
