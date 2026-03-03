@@ -124,10 +124,23 @@ col_chat, col_output = st.columns([1, 1])
 
 with col_chat:
     st.subheader("💬 Asistente IA")
-    if "mensajes" not in st.
+    if "mensajes" not in st.session_state: st.session_state.mensajes = [{"role": "assistant", "content": "Hola, soy el núcleo del Bio-Digital LIMS."}]
+    for msg in st.session_state.mensajes[-2:]:
+        with st.chat_message(msg["role"]): st.markdown(msg["content"])
+    if prompt := st.chat_input("Consulta a la IA..."):
+        st.session_state.mensajes.append({"role": "user", "content": prompt})
+        res = "⚠️ BLOQUEO POR FALLO CRÍTICO." if simular_alerta else f"Análisis de '{prompt}': Sistemas OK."
+        st.session_state.mensajes.append({"role": "assistant", "content": res})
+        st.rerun()
 
-
-
+with col_output:
+    st.subheader("🖥️ Terminal")
+    with st.container(height=230, border=True):
+        if genetica: st.success(">>> [MÓDULO 1] Variantes BRCA1 detectadas.")
+        elif vision: st.warning(">>> [MÓDULO 2] Conteo de colonias irregular.")
+        elif roi: st.info(">>> [MÓDULO 4] ROI proyectado: 145%.")
+        elif simular_alerta: st.error(">>> [HALT] SOBRECALENTAMIENTO.")
+        else: st.write(">>> Monitorizando sensores IoT...")
 
 
 
