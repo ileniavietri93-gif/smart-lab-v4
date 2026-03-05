@@ -4,6 +4,7 @@ import numpy as np
 import plotly.graph_objects as go
 import time
 import os
+import re
 from PIL import Image
 
 # --- 1. CONFIGURACIÓN Y ESTILOS (DASHBOARD DARK MODE) ---
@@ -26,7 +27,7 @@ st.markdown("""
         box-shadow: 0 4px 6px rgba(0,0,0,0.3); 
     }
     
-    /* Títulos de las cajas (Muestras, Carga CPU, etc.) - Cyan brillante */
+    /* Títulos de las cajas - Cyan brillante */
     div[data-testid="stMetricLabel"] p { 
         color: #00ffcc !important; 
         font-family: 'Orbitron', sans-serif;
@@ -56,7 +57,7 @@ st.markdown("""
     /* 3. ARREGLO DE LAS ADVERTENCIAS Y ALERTAS */
     div[data-testid="stAlert"] { 
         background-color: #111827 !important; 
-        border: 1px solid #ef4444 !important; /* Rojo emergencia */
+        border: 1px solid #ef4444 !important; 
         border-radius: 4px !important;
     }
     div[data-testid="stAlert"] * { 
@@ -182,7 +183,6 @@ with col_gemelo:
             contours = {"z": {"show": True, "start": 22, "end": 50, "size": 2, "color":"white"}}
         )])
         
-        # AQUÍ ESTABA EL ERROR. Lo he separado línea por línea.
         fig3d.update_layout(
             scene=dict(
                 xaxis_title="X (Metros)", 
@@ -255,13 +255,12 @@ with col_chat:
     for msg in st.session_state.messages[-3:]:
         with st.chat_message(msg["role"]): st.markdown(msg["content"])
     
-     if prompt := st.chat_input("Ej: muestra 405, etanol, secuenciador, sala blanca, personal..."):
+    if prompt := st.chat_input("Ej: muestra 405, etanol, secuenciador, sala blanca, personal..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"): st.markdown(prompt)
         
         # --- MOTOR DE SIMULACIÓN IA AVANZADO Y CLÍNICO ---
         prompt_lower = prompt.lower()
-        import re 
         
         # Diccionarios de palabras clave
         kw_nota = ["nota", "calificación", "evalu", "puntuación", "10", "aprobar"]
@@ -269,7 +268,6 @@ with col_chat:
         kw_estado = ["estado", "sensor", "temperatura", "red", "sistema", "planta"]
         kw_muestra = ["muestra", "paciente", "pcr", "adn", "gen", "tubo", "lote", "analisis"]
         kw_inventario = ["inventario", "stock", "almacen", "materiales", "caducidad", "etanol", "alcohol", "eppendorf"]
-        # NUEVAS PALABRAS CLAVE:
         kw_equipo = ["equipo", "máquina", "secuenciador", "termociclador", "centrifuga", "mantenimiento", "calibracion", "ngs"]
         kw_seguridad = ["contaminacion", "sala blanca", "presion", "bioseguridad", "filtro", "hepa", "aire"]
         kw_personal = ["turno", "personal", "auditoria", "quien", "tecnico", "doctor", "operario"]
@@ -297,7 +295,6 @@ with col_chat:
             else:
                 respuesta = f"📦 **Reporte General de Almacén:**\n- Kits de extracción de ácidos nucleicos: {np.random.randint(60, 95)}% de capacidad.\n- Placas Multiplex: {np.random.randint(10, 50)} unidades.\n- EPIs (Guantes de nitrilo/Batas): Stock nominal."
 
-        # --- LAS NUEVAS RESPUESTAS CLINICAS ---
         elif any(k in prompt_lower for k in kw_equipo):
             if "secuenciador" in prompt_lower or "ngs" in prompt_lower:
                 respuesta = "⚙️ **Diagnóstico de Equipos:** El Secuenciador Illumina NovaSeq 6000 está en el ciclo 45 de 300. Mantenimiento predictivo: Óptimo. Próximo cambio de óptica programado en 14 días."
@@ -326,4 +323,20 @@ with col_chat:
         
         st.session_state.messages.append({"role": "assistant", "content": respuesta})
         with st.chat_message("assistant"): st.markdown(respuesta)
+
+with col_output:
+    st.subheader("🖥️ TERMINAL DE SUBSISTEMAS")
+    terminal_txt = f"""
+    [{time.strftime('%H:%M:%S')}] LIMS CORE INITIALIZED... OK
+    [{time.strftime('%H:%M:%S')}] IOT SENSOR NETWORK: CONNECTED
+    """
+    if simular_alerta:
+        terminal_txt += f"[{time.strftime('%H:%M:%S')}] ALERT: THERMAL OVERLOAD DETECTED\n"
+        terminal_txt += f"[{time.strftime('%H:%M:%S')}] ACTION: EXECUTING SECTOR ISOLATION\n"
+        terminal_txt += f"[{time.strftime('%H:%M:%S')}] WARNING: REROUTING SAMPLES TO BACKUP FREEZERS"
+    else:
+        terminal_txt += f"[{time.strftime('%H:%M:%S')}] AI DIAGNOSTIC ENGINE: STANDBY\n"
+        terminal_txt += f"[{time.strftime('%H:%M:%S')}] ALL SYSTEMS NOMINAL..."
         
+    st.code(terminal_txt, language="bash")
+                                                    
