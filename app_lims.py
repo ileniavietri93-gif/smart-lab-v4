@@ -326,4 +326,4 @@ with col_chat:
         
         st.session_state.messages.append({"role": "assistant", "content": respuesta})
         with st.chat_message("assistant"): st.markdown(respuesta)
-
+        
