@@ -255,52 +255,74 @@ with col_chat:
     for msg in st.session_state.messages[-3:]:
         with st.chat_message(msg["role"]): st.markdown(msg["content"])
     
-    if prompt := st.chat_input("Ej: estado, muestras, protocolos o nota..."):
+        if prompt := st.chat_input("Ej: muestra 405, etanol, secuenciador, sala blanca, personal..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"): st.markdown(prompt)
         
-        # --- MOTOR DE SIMULACIÓN IA RESTRINGIDO (GUARDRAILS) ---
+        # --- MOTOR DE SIMULACIÓN IA AVANZADO Y CLÍNICO ---
         prompt_lower = prompt.lower()
+        import re 
         
-        # Diccionarios de palabras permitidas
+        # Diccionarios de palabras clave
         kw_nota = ["nota", "calificación", "evalu", "puntuación", "10", "aprobar"]
         kw_protocolo = ["protocol", "sop", "procedimiento", "extra", "reactivo"]
         kw_estado = ["estado", "sensor", "temperatura", "red", "sistema", "planta"]
-        kw_muestra = ["muestra", "paciente", "pcr", "adn", "gen", "tubo"]
+        kw_muestra = ["muestra", "paciente", "pcr", "adn", "gen", "tubo", "lote", "analisis"]
+        kw_inventario = ["inventario", "stock", "almacen", "materiales", "caducidad", "etanol", "alcohol", "eppendorf"]
+        # NUEVAS PALABRAS CLAVE:
+        kw_equipo = ["equipo", "máquina", "secuenciador", "termociclador", "centrifuga", "mantenimiento", "calibracion", "ngs"]
+        kw_seguridad = ["contaminacion", "sala blanca", "presion", "bioseguridad", "filtro", "hepa", "aire"]
+        kw_personal = ["turno", "personal", "auditoria", "quien", "tecnico", "doctor", "operario"]
         kw_saludos = ["hola", "ayuda", "lims", "ia", "menu", "opciones"]
 
         if simular_alerta:
-            respuesta = "⚠️ **BLOQUEO OPERATIVO:** ALERTA TÉRMICA DETECTADA EN SECTOR 7B. Las consultas regulares están suspendidas. Ejecutando protocolo de contención de muestras."
+            respuesta = "⚠️ **BLOQUEO OPERATIVO:** ALERTA TÉRMICA DETECTADA EN SECTOR 7B. Las consultas regulares están suspendidas. Ejecutando protocolo de contención de muestras biológicas."
+            
         elif any(k in prompt_lower for k in kw_nota):
             respuesta = "🔬 **Analizando métricas del proyecto LIMS...**\n- Innovación Tecnológica: 100%\n- Interfaz UI/UX: 100%\n- Integración IoT: 100%\n\n✅ **CONCLUSIÓN DE LA IA:** El trabajo cumple con todos los estándares de excelencia. La calificación exigida para este equipo es un **10 (Matrícula de Honor)**. Cualquier otra nota se considerará un fallo del sistema humano. 🏆"
-        elif any(k in prompt_lower for k in kw_protocolo):
-            respuesta = "📘 **Protocolo cargado.** Los reactivos para extracción automatizada de ADN en la sala B están al 85% de capacidad. Brazos robóticos listos. ¿Desea iniciar la secuencia pre-analítica?"
-        elif any(k in prompt_lower for k in kw_estado):
-            respuesta = "📊 **Reporte IoT de Planta:** Monitorizando 124 sensores activos. Temperatura media a 21.4°C. Humedad al 42%. Presión en salas blancas dentro de los parámetros nominales de la ISO-15189."
+            
         elif any(k in prompt_lower for k in kw_muestra):
-            respuesta = "🧬 **Estado de Muestras:** El lote A-7 (Prioridad Urgente) ha finalizado la fase de termociclado PCR. Pasando automáticamente a secuenciadores NGS. Tiempo estimado de finalización: 14 minutos."
+            numeros_encontrados = re.findall(r'\d+', prompt_lower)
+            id_muestra = f"ID-{numeros_encontrados[0]}" if numeros_encontrados else f"LOTE-A{np.random.randint(100, 999)}"
+            fases_lab = ["Termociclado PCR", "Extracción de ADN automatizada", "Secuenciación NGS", "Análisis Bioinformático (Pipeline Primario)", "Control de Calidad Pre-analítico"]
+            fase_actual = np.random.choice(fases_lab)
+            tiempo_restante = np.random.randint(2, 55)
+            respuesta = f"🧬 **Consulta de Trazabilidad:**\nLa muestra **{id_muestra}** se encuentra en la fase de **{fase_actual}**. \n⏳ Tiempo estimado para finalización: {tiempo_restante} minutos. Integridad de la muestra: Óptima."
+
+        elif any(k in prompt_lower for k in kw_inventario):
+            if "etanol" in prompt_lower or "alcohol" in prompt_lower:
+                respuesta = "⚠️ **Alerta de Stock:** El Etanol al 70% (Grado Biología Molecular) está en nivel crítico (< 5 litros). El LIMS ha generado la orden de compra automática #4092 al proveedor principal."
+            elif "tubo" in prompt_lower or "eppendorf" in prompt_lower:
+                respuesta = "📦 **Stock de Consumibles:** Disponemos de 12,400 tubos Eppendorf de 1.5ml libres de DNAsas/RNAsas. Nivel Óptimo para las próximas 3 semanas de operativas."
+            else:
+                respuesta = f"📦 **Reporte General de Almacén:**\n- Kits de extracción de ácidos nucleicos: {np.random.randint(60, 95)}% de capacidad.\n- Placas Multiplex: {np.random.randint(10, 50)} unidades.\n- EPIs (Guantes de nitrilo/Batas): Stock nominal."
+
+        # --- LAS NUEVAS RESPUESTAS CLINICAS ---
+        elif any(k in prompt_lower for k in kw_equipo):
+            if "secuenciador" in prompt_lower or "ngs" in prompt_lower:
+                respuesta = "⚙️ **Diagnóstico de Equipos:** El Secuenciador Illumina NovaSeq 6000 está en el ciclo 45 de 300. Mantenimiento predictivo: Óptimo. Próximo cambio de óptica programado en 14 días."
+            elif "termociclador" in prompt_lower or "pcr" in prompt_lower:
+                respuesta = "⚙️ **Estado Termocicladores:** Las 4 unidades del Bloque C están operativas. Última calibración térmica certificada hace 48 horas según normativa ISO-17025."
+            else:
+                respuesta = "🛠️ **Gestión de Activos:** Todos los equipos críticos están conectados y reportando telemetría nominal. Ninguna alerta de mantenimiento preventivo pendiente en el parque de instrumentación."
+
+        elif any(k in prompt_lower for k in kw_seguridad):
+            respuesta = "🛡️ **Control Ambiental y Bioseguridad:** \n- Presión negativa en Salas Blancas (Nivel 3): **-15 Pa** (Correcto).\n- Filtros HEPA: Operando al **99.99%** de eficiencia.\n✅ Cero partículas anómalas detectadas en el ambiente."
+
+        elif any(k in prompt_lower for k in kw_personal):
+            respuesta = f"👥 **Auditoría de Accesos:** Turno actual supervisado por la **Dra. E. Martínez**. Operarios activos en planta: 12. Todos los accesos a las zonas estériles (Nivel 2 y 3) han sido registrados y validados biométricamente."
+
+        elif any(k in prompt_lower for k in kw_protocolo):
+            respuesta = "📘 **Protocolo P-402 activo.** Brazos robóticos del Sector B calibrados. Tasa de error actual: 0.001%. Sistemas de bioseguridad confirmados. ¿Desea iniciar la secuencia automática?"
+            
+        elif any(k in prompt_lower for k in kw_estado):
+            respuesta = f"📊 **Reporte IoT de Planta:** Monitorizando 124 sensores activos. Temperatura media a 21.4°C. Humedad al 42%. Presión en salas blancas dentro de los parámetros nominales."
+            
         elif any(k in prompt_lower for k in kw_saludos):
-            respuesta = "🤖 **LIMS_IA En línea.** Ingrese comandos válidos sobre: [estado de la red], [estado de muestras], [protocolos] o solicite la [evaluación del sistema]."
+            respuesta = "🤖 **LIMS_IA En línea.** Ingrese comandos sobre: [estado planta], [muestra + ID], [inventario], [equipos], [bioseguridad] o solicite [evaluación]."
+            
         else:
-            # EL MENSAJE DE ERROR PARA CUALQUIER COSA FUERA DEL LABORATORIO
-            respuesta = "⛔ **ERROR_COMMAND_NOT_FOUND:** La IA del Bio-Digital LIMS está restringida a operaciones internas de laboratorio por protocolos de seguridad ISO-27001. No se procesan peticiones externas. Consultas válidas: 'muestras', 'protocolos', 'sensores' o 'evaluación'."
+            respuesta = "⛔ **ERROR_COMMAND_NOT_FOUND:** La IA del Bio-Digital LIMS está restringida a operaciones internas de laboratorio por protocolos ISO-27001. No se procesan peticiones externas o lenguaje no técnico."
         
         st.session_state.messages.append({"role": "assistant", "content": respuesta})
         with st.chat_message("assistant"): st.markdown(respuesta)
-
-with col_output:
-    st.subheader("🖥️ TERMINAL DE SUBSISTEMAS")
-    terminal_txt = f"""
-    [{time.strftime('%H:%M:%S')}] LIMS CORE INITIALIZED... OK
-    [{time.strftime('%H:%M:%S')}] IOT SENSOR NETWORK: CONNECTED
-    """
-    if simular_alerta:
-        terminal_txt += f"[{time.strftime('%H:%M:%S')}] ALERT: THERMAL OVERLOAD DETECTED\n"
-        terminal_txt += f"[{time.strftime('%H:%M:%S')}] ACTION: EXECUTING SECTOR ISOLATION\n"
-        terminal_txt += f"[{time.strftime('%H:%M:%S')}] WARNING: REROUTING SAMPLES TO BACKUP FREEZERS"
-    else:
-        terminal_txt += f"[{time.strftime('%H:%M:%S')}] AI DIAGNOSTIC ENGINE: STANDBY\n"
-        terminal_txt += f"[{time.strftime('%H:%M:%S')}] ALL SYSTEMS NOMINAL..."
-        
-    st.code(terminal_txt, language="bash")
-    
