@@ -255,7 +255,7 @@ with col_chat:
     for msg in st.session_state.messages[-3:]:
         with st.chat_message(msg["role"]): st.markdown(msg["content"])
     
-        if prompt := st.chat_input("Ej: muestra 405, etanol, secuenciador, sala blanca, personal..."):
+     if prompt := st.chat_input("Ej: muestra 405, etanol, secuenciador, sala blanca, personal..."):
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"): st.markdown(prompt)
         
@@ -326,3 +326,4 @@ with col_chat:
         
         st.session_state.messages.append({"role": "assistant", "content": respuesta})
         with st.chat_message("assistant"): st.markdown(respuesta)
+
